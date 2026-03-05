@@ -551,10 +551,10 @@ var VIDEO_MAP = {
 };
 
 var vidPlay = {};
+var exMap = {}; // key -> {ex, color} for in-place card updates
 
 function playVideo(key, vid) {
   vidPlay[key] = true;
-  // In-place DOM swap — no full re-render, page stays in position
   var wrap = document.getElementById('vid-' + key);
   if (wrap && vid) {
     wrap.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + vid +
@@ -726,15 +726,36 @@ function render() {
   html += '</div>';
 
   app.innerHTML = html;
-  // Restore scroll position — prevents jump-to-top on re-render
-  if (_scrollY > 0) { window.scrollTo(0, _scrollY); }
+  // Restore scroll — wait one frame for Safari to finish layout before scrolling
+  if (_scrollY > 0) {
+    requestAnimationFrame(function() {
+      window.scrollTo(0, _scrollY);
+    });
+  }
+}
+
+function buildExpandedContent(ex, key, color) {
+  var isDone = !!state.completed[key];
+  var gq = ex.video || ex.name.replace(/[\u05d0-\u05ea]/g, '').trim() || ex.name;
+  var html = videoHtml(key, gq);
+  html += '<div class="ex-notes">💡 <strong>הערות:</strong> ' + escHtml(ex.notes) + '</div>';
+  html += '<div class="ex-grid">';
+  html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">סטים</div><div class="ex-stat-value" style="color:' + color + '">' + ex.sets + '</div></div>';
+  html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">חזרות</div><div class="ex-stat-value" style="color:' + color + '">' + ex.reps + '</div></div>';
+  html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">מנוחה</div><div class="ex-stat-value" style="color:' + color + '">' + (ex.rest === "-" ? "—" : ex.rest + "ש") + '</div></div>';
+  html += '</div>';
+  html += '<div class="ex-actions">';
+  html += '<button class="done-btn ' + (isDone ? 'checked' : '') + '" onclick="event.stopPropagation();toggleDone(\'' + key + '\')" style="width:100%;border-radius:12px;font-size:15px;">' + (isDone ? '✅ סיימתי' : '○ סמן כהושלם') + '</button>';
+  html += '</div>';
+  return html;
 }
 
 function renderExCard(ex, key, color, showDay) {
+  exMap[key] = {ex: ex, color: color}; // register for in-place updates
   var isExpanded = state.expandedEx === key;
   var isDone = !!state.completed[key];
 
-  var html = '<div class="ex-card ' + (isDone ? 'done' : '') + '">';
+  var html = '<div class="ex-card ' + (isDone ? 'done' : '') + '" id="excard-' + key + '">';
   html += '<div class="ex-main" onclick="toggleEx(\'' + key + '\')">';
   html += '<div class="ex-icon" style="background:' + color + '18">' + ex.icon + '</div>';
   html += '<div class="ex-info">';
@@ -748,18 +769,8 @@ function renderExCard(ex, key, color, showDay) {
   html += '</div>';
 
   if (isExpanded) {
-    var gq = ex.video || ex.name.replace(/[\u05d0-\u05ea\u2014—]/g, '').trim();
-    html += '<div class="ex-expanded">';
-    html += videoHtml(key, gq);
-    html += '<div class="ex-notes">💡 <strong>הערות:</strong> ' + escHtml(ex.notes) + '</div>';
-    html += '<div class="ex-grid">';
-    html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">סטים</div><div class="ex-stat-value" style="color:' + color + '">' + ex.sets + '</div></div>';
-    html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">חזרות</div><div class="ex-stat-value" style="color:' + color + '">' + ex.reps + '</div></div>';
-    html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">מנוחה</div><div class="ex-stat-value" style="color:' + color + '">' + (ex.rest === "-" ? "—" : ex.rest + "ש") + '</div></div>';
-    html += '</div>';
-    html += '<div class="ex-actions">';
-    html += '<button class="done-btn ' + (isDone ? 'checked' : '') + '" onclick="event.stopPropagation();toggleDone(\'' + key + '\')" style="width:100%;border-radius:12px;font-size:15px;">' + (isDone ? '✅ סיימתי' : '○ סמן כהושלם') + '</button>';
-    html += '</div>';
+    html += '<div class="ex-expanded" id="exexp-' + key + '">';
+    html += buildExpandedContent(ex, key, color);
     html += '</div>';
   }
 
@@ -774,8 +785,77 @@ function escHtml(s) {
 
 function switchView(v) { state.view = v; state.search = ""; state.expandedEx = null; render(); }
 function switchDay(id) { state.activeDay = id; state.expandedEx = null; render(); var c = document.getElementById("content"); if(c) c.scrollTop = 0; }
-function toggleEx(key) { state.expandedEx = state.expandedEx === key ? null : key; render(); }
-function toggleDone(key) { state.completed[key] = !state.completed[key]; saveCompleted(); if (navigator.vibrate) navigator.vibrate(30); render(); }
+function toggleEx(key) {
+  var prevKey = state.expandedEx;
+  state.expandedEx = (prevKey === key) ? null : key;
+
+  // Close previously open card in-place
+  if (prevKey) {
+    var prevCard = document.getElementById('excard-' + prevKey);
+    if (prevCard) {
+      var prevExp = document.getElementById('exexp-' + prevKey);
+      if (prevExp) prevCard.removeChild(prevExp);
+      var prevArrow = prevCard.querySelector('.ex-arrow');
+      if (prevArrow) prevArrow.classList.remove('open');
+    }
+  }
+
+  // Open new card in-place (if toggling to a new one)
+  if (state.expandedEx) {
+    var card = document.getElementById('excard-' + key);
+    if (!card) { render(); return; } // fallback
+
+    var arrow = card.querySelector('.ex-arrow');
+    if (arrow) arrow.classList.add('open');
+
+    var info = exMap[key];
+    if (!info) { render(); return; } // fallback
+
+    var expDiv = document.createElement('div');
+    expDiv.className = 'ex-expanded';
+    expDiv.id = 'exexp-' + key;
+    expDiv.innerHTML = buildExpandedContent(info.ex, key, info.color);
+    card.appendChild(expDiv);
+
+    // Scroll the card gently into view (doesn't jump, just reveals if off-screen)
+    setTimeout(function() {
+      card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+    }, 80);
+  }
+}
+
+function toggleDone(key) {
+  state.completed[key] = !state.completed[key];
+  saveCompleted();
+  if (navigator.vibrate) navigator.vibrate(30);
+
+  // In-place card update — no re-render
+  var card = document.getElementById('excard-' + key);
+  if (card) {
+    if (state.completed[key]) { card.classList.add('done'); } else { card.classList.remove('done'); }
+    var btn = card.querySelector('.done-btn');
+    if (btn) {
+      btn.textContent = state.completed[key] ? '✅ סיימתי' : '○ סמן כהושלם';
+      if (state.completed[key]) { btn.classList.add('checked'); } else { btn.classList.remove('checked'); }
+    }
+  }
+  // Update progress bar
+  var day = DAYS.find(function(d){ return d.id === state.activeDay; });
+  if (day) {
+    var total = 0, done = 0;
+    day.sections.forEach(function(sec) {
+      sec.exercises.forEach(function(ex, i) {
+        total++;
+        if (state.completed[day.id + "-" + sec.name + "-" + i]) done++;
+      });
+    });
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    var fill = document.querySelector('.progress-fill');
+    if (fill) fill.style.width = pct + '%';
+    var counter = document.querySelector('.progress-top span:last-child');
+    if (counter) counter.textContent = done + '/' + total;
+  }
+}
 function onSearch(val) { state.search = val; state.view = "search"; render(); }
 function showTimer() { state.timerVisible = true; render(); }
 
