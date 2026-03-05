@@ -340,17 +340,17 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* GIF styles */
-.gc { margin: 10px 0; border-radius: 12px; overflow: hidden; background: #111; position: relative; cursor: pointer; }
-.gc img { width: 100%; display: block; border-radius: 12px; max-height: 260px; object-fit: cover; }
-.gld { display: flex; align-items: center; justify-content: center; height: 120px; color: rgba(255,255,255,.5); font-size: 13px; gap: 8px; }
-.gsp { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.1); border-top-color: var(--red); border-radius: 50%; animation: gspin .7s linear infinite; }
-@keyframes gspin { to { transform: rotate(360deg); } }
-.gn { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
-.gdot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.15); cursor: pointer; border: none; padding: 0; }
-.gdot.ac { background: var(--red); }
-.glbl { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.65); color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 8px; }
-.nog { text-align: center; padding: 12px; color: rgba(255,255,255,.45); font-size: 12px; border-radius: 10px; margin: 10px 0; }
+/* Video player styles */
+.vid-wrap { margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; position: relative; aspect-ratio: 16/9; }
+.vid-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+.vid-thumb { width: 100%; height: 100%; position: relative; cursor: pointer; }
+.vid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vid-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 56px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.vid-play::after { content: ''; border-left: 22px solid #fff; border-top: 13px solid transparent; border-bottom: 13px solid transparent; margin-right: -4px; }
+.vid-loading { display: flex; align-items: center; justify-content: center; height: 160px; color: rgba(255,255,255,.5); font-size: 13px; gap: 8px; }
+.vid-spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.1); border-top-color: var(--red); border-radius: 50%; animation: vspin .7s linear infinite; }
+@keyframes vspin { to { transform: rotate(360deg); } }
+.vid-err { text-align: center; padding: 12px; color: rgba(255,255,255,.45); font-size: 12px; margin: 10px 0; }
 </style>
 </head>
 <body>
@@ -484,65 +484,75 @@ function getYouTubeUrl(query) {
   return "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
 }
 
-// GIF SYSTEM
-var gifData = {};
-var gifLoad = {};
-var gifI = {};
+// VIDEO SYSTEM - uses Invidious API to find YouTube video IDs, embeds inline
+var vidData = {};   // key -> videoId or null
+var vidLoad = {};   // key -> true/false
+var vidPlay = {};   // key -> true (user clicked play)
 
-function fetchGif(key, q) {
-  if (gifData[key] || gifLoad[key]) return;
-  gifLoad[key] = true;
-  // Search specifically for workout/gym content with strict fitness terms
-  var query = q + " workout gym exercise tutorial";
-  var url = "https://g.tenor.com/v1/search?q=" + encodeURIComponent(query) +
-    "&key=LIVDSRZULELA&limit=8&media_filter=minimal&contentfilter=medium&ar_range=wide";
-  fetch(url).then(function(r){ return r.json(); }).then(function(d){
-    if (d.results && d.results.length) {
-      // Filter: only keep GIFs where the title/tags suggest fitness content
-      var fitnessKeywords = ["workout","exercise","gym","fitness","training","lift","squat","deadlift","press","curl","row","stretch","plank","form","technique","muscle","strength","mobility","yoga","pilates","dumbbell","barbell","kettlebell","cable","rep","set"];
-      var filtered = d.results.filter(function(r){
-        var title = (r.title || "").toLowerCase();
-        var tags = (r.tags || []).join(" ").toLowerCase();
-        var combined = title + " " + tags;
-        return fitnessKeywords.some(function(kw){ return combined.includes(kw); });
-      });
-      // Fall back to all results if filter is too strict
-      var results = filtered.length > 0 ? filtered : d.results;
-      gifData[key] = results.slice(0,3).map(function(r){ return r.media[0].gif.url; });
-    } else { gifData[key] = []; }
-    gifLoad[key] = false;
-    render();
-  }).catch(function(){ gifData[key] = []; gifLoad[key] = false; render(); });
+// Invidious public instances (fallbacks)
+var INV_INSTANCES = [
+  "https://inv.tux.pizza",
+  "https://invidious.privacydev.net",
+  "https://yt.cdaut.de"
+];
+
+function fetchVideo(key, query) {
+  if (vidData.hasOwnProperty(key) || vidLoad[key]) return;
+  vidLoad[key] = true;
+  var q = encodeURIComponent(query + " exercise tutorial form");
+  var tried = 0;
+
+  function tryNext() {
+    if (tried >= INV_INSTANCES.length) {
+      vidData[key] = null; vidLoad[key] = false; render(); return;
+    }
+    var url = INV_INSTANCES[tried] + "/api/v1/search?q=" + q + "&fields=videoId,title&type=video&sort_by=relevance";
+    tried++;
+    fetch(url, {signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (Array.isArray(d) && d.length > 0 && d[0].videoId) {
+          vidData[key] = d[0].videoId;
+        } else {
+          tryNext(); return;
+        }
+        vidLoad[key] = false; render();
+      })
+      .catch(function(){ tryNext(); });
+  }
+  setTimeout(tryNext, 20);
 }
 
-function nextGif(k) {
-  if (!gifData[k] || gifData[k].length < 2) return;
-  gifI[k] = ((gifI[k] || 0) + 1) % gifData[k].length;
+function playVideo(key) {
+  vidPlay[key] = true;
   render();
 }
 
-function pickGif(k, i) { gifI[k] = i; render(); }
+function videoHtml(key, query) {
+  if (!vidData.hasOwnProperty(key) && !vidLoad[key]) fetchVideo(key, query);
 
-function gifHtml(key, q, col) {
-  if (!gifData[key] && !gifLoad[key]) setTimeout(function(){ fetchGif(key, q); }, 20);
-  if (gifLoad[key]) return '<div class="gc"><div class="gld"><div class="gsp"></div> טוען הדגמה...</div></div>';
-  if (gifData[key] && gifData[key].length) {
-    var i = gifI[key] || 0, u = gifData[key][i], dots = '';
-    if (gifData[key].length > 1) {
-      dots = '<div class="gn">';
-      for (var j = 0; j < gifData[key].length; j++) {
-        dots += '<button class="gdot' + (j === i ? ' ac' : '') + '"' + (j === i ? ' style="background:' + col + '"' : '') + ' onclick="event.stopPropagation();pickGif(\'' + key + '\',' + j + ')"></button>';
-      }
-      dots += '</div>';
-    }
-    return '<div class="gc" onclick="event.stopPropagation();nextGif(\'' + key + '\')"><img src="' + u + '" alt="הדגמה" loading="lazy" onerror="this.parentElement.outerHTML=\'<div class=nog>לחץ על סרטון YouTube למטה</div>\'"><div class="glbl">👇 לחץ לעוד</div></div>' + dots;
+  if (vidPlay[key] && vidData[key]) {
+    // Embedded player
+    return '<div class="vid-wrap"><iframe src="https://www.youtube-nocookie.com/embed/' + vidData[key] + '?autoplay=1&rel=0&modestbranding=1" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>';
   }
-  if (gifData[key] && !gifData[key].length) return '<div class="nog">🎬 לחץ על סרטון YouTube למטה</div>';
-  return '';
+
+  if (vidLoad[key]) {
+    return '<div class="vid-wrap"><div class="vid-loading"><div class="vid-spinner"></div> מחפש הדגמה...</div></div>';
+  }
+
+  if (vidData[key]) {
+    // Thumbnail with play button
+    var thumb = "https://img.youtube.com/vi/" + vidData[key] + "/mqdefault.jpg";
+    return '<div class="vid-wrap"><div class="vid-thumb" onclick="event.stopPropagation();playVideo(\'' + key + '\')">' +
+      '<img src="' + thumb + '" onerror="this.src=\'https://img.youtube.com/vi/' + vidData[key] + '/default.jpg\'">' +
+      '<div class="vid-play"></div>' +
+      '</div></div>';
+  }
+
+  return '<div class="vid-err">🎬 לחץ על "YouTube" למטה לצפייה</div>';
 }
 
-window.nextGif = nextGif;
-window.pickGif = pickGif;
+window.playVideo = playVideo;
 
 // TIMER
 function startTimer(seconds) {
@@ -698,10 +708,9 @@ function renderExCard(ex, key, color, showDay) {
   html += '</div>';
 
   if (isExpanded) {
-    // Use the curated English video search term directly — always fitness-relevant
     var gq = ex.video || ex.name.replace(/[\u05d0-\u05ea\u2014—]/g, '').trim();
     html += '<div class="ex-expanded">';
-    html += gifHtml(key, gq, color);
+    html += videoHtml(key, gq);
     html += '<div class="ex-notes">💡 <strong>הערות:</strong> ' + escHtml(ex.notes) + '</div>';
     html += '<div class="ex-grid">';
     html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">סטים</div><div class="ex-stat-value" style="color:' + color + '">' + ex.sets + '</div></div>';
