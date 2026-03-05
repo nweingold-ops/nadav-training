@@ -5,553 +5,307 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>נדב — תוכנית אימון</title>
+<title>Chef Nadi — PPL Training</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
-
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-:root {
-  --red: #E94560;
-  --blue: #0F3460;
-  --green: #16A085;
-  --purple: #8E44AD;
-  --dark: #0a0a1a;
-  --card: rgba(255,255,255,0.05);
-  --border: rgba(255,255,255,0.08);
-  --text: #e8e8e8;
-  --text2: rgba(255,255,255,0.55);
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --push:#E94560;--pull:#2980B9;--legs:#27AE60;--mob:#8E44AD;
+  --dk:#08080f;--card:rgba(255,255,255,.04);--bd:rgba(255,255,255,.07);
+  --t1:#eaeaea;--t2:rgba(255,255,255,.5);
+  --sT:env(safe-area-inset-top,0px);--sB:env(safe-area-inset-bottom,0px)
 }
+html,body{height:100%;overflow:hidden;background:var(--dk);color:var(--t1);font-family:'Heebo',sans-serif}
+#app{height:100%;display:flex;flex-direction:column}
 
-html, body {
-  height: 100%;
-  overflow: hidden;
-  background: var(--dark);
-  color: var(--text);
-  font-family: 'Heebo', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+/* Header */
+.hd{padding:calc(10px + var(--sT)) 16px 10px;flex-shrink:0;z-index:100;position:relative}
+.hd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hd h1{font-size:18px;font-weight:900;color:#fff;letter-spacing:-.3px}
+.hd-sub{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px}
+.vt{display:flex;gap:5px}
+.vb{padding:6px 13px;border-radius:18px;border:none;font-family:'Heebo';font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8)}
+.vb.a{background:#fff;color:#111}
+.tabs{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:8px 14px;border-radius:10px;border:2px solid transparent;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-family:'Heebo';font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tab.a{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff}
 
-#app {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+/* Content */
+.cnt{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px calc(16px + var(--sB))}
 
-.header {
-  background: linear-gradient(135deg, #E94560 0%, #0F3460 100%);
-  padding: calc(12px + var(--safe-top)) 16px 12px;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 100;
-  box-shadow: 0 4px 30px rgba(233,69,96,0.25);
-}
+/* Progress */
+.prog{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.prog-top{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:6px}
+.prog-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .4s}
+.prog-done{text-align:center;margin-top:6px;font-size:12px;color:#2ecc71;font-weight:700}
 
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
+/* Warning */
+.warn{background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.2);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;line-height:1.6}
 
-.header h1 { font-size: 19px; font-weight: 800; color: #fff; }
-.header-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+/* Section header */
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 2px 6px}
+.sec-ln{width:3px;height:20px;border-radius:2px;flex-shrink:0}
+.sec-t{font-size:14px;font-weight:700}
 
-.view-toggle { display: flex; gap: 6px; }
+/* Exercise Card */
+.ec{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:6px;overflow:hidden}
+.ec.done{background:rgba(46,204,113,.05);border-color:rgba(46,204,113,.15)}
+.ec-m{display:flex;align-items:center;gap:9px;padding:11px 12px;cursor:pointer;user-select:none}
+.ec-i{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ec-f{flex:1;min-width:0}
+.ec-n{font-weight:700;font-size:13px;color:#fff;line-height:1.3}
+.ec-mt{font-size:10px;color:var(--t2);display:flex;gap:7px;margin-top:1px;flex-wrap:wrap}
+.ec-dg{font-size:9px;font-weight:700;margin-top:2px}
+.ec-ar{font-size:10px;color:rgba(255,255,255,.15);transition:transform .3s;flex-shrink:0}
+.ec-ar.o{transform:rotate(180deg)}
 
-.view-btn {
-  padding: 7px 14px;
-  border-radius: 20px;
-  border: none;
-  font-family: 'Heebo', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-}
-.view-btn.active { background: #fff; color: var(--red); }
+/* Expanded */
+.ec-x{padding:0 12px 12px;border-top:1px solid rgba(255,255,255,.04)}
+.ec-nt{background:rgba(255,255,255,.025);border-radius:8px;padding:9px 10px;margin:8px 0;font-size:11px;line-height:1.65;color:rgba(255,255,255,.65)}
+.ec-g{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px}
+.ec-s{border-radius:8px;padding:7px;text-align:center}
+.ec-sl{font-size:9px;color:var(--t2)}
+.ec-sv{font-size:16px;font-weight:800}
+.ec-a{display:flex;gap:6px}
+.dn-b{flex:1;padding:11px;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.4);font-family:'Heebo';font-size:13px;font-weight:700;cursor:pointer;text-align:center}
+.dn-b.k{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
 
-.day-tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.day-tabs::-webkit-scrollbar { display: none; }
+/* Video */
+.vid-wrap{width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#0d0d0d;margin:8px 0;position:relative}
+.vid-wrap iframe{width:100%;height:100%;border:none;display:block}
+.vid-thumb{width:100%;height:100%;position:relative;cursor:pointer}
+.vid-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.vid-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;background:rgba(255,0,0,.92);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.vid-play::after{content:'';border-left:26px solid #fff;border-top:15px solid transparent;border-bottom:15px solid transparent;margin-right:-4px}
+.vid-hint{text-align:center;font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;margin-bottom:6px}
 
-.day-tab {
-  flex: 0 0 auto;
-  padding: 9px 14px;
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  font-family: 'Heebo', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-}
-.day-tab.active { border-color: #fff; background: rgba(255,255,255,0.22); }
+/* Muscles badge */
+.musc{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:6px;font-size:9px;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);margin-top:2px}
 
-.search-bar { padding: 12px 16px 8px; flex-shrink: 0; }
+/* Timer */
+.tmr{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,15,.95);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.08);padding:10px 14px calc(10px + var(--sB));display:flex;align-items:center;gap:10px;z-index:200;transform:translateY(100%);transition:transform .25s}
+.tmr.v{transform:translateY(0)}
+.tmr-d{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;min-width:70px;text-align:center}
+.tmr-bs{display:flex;gap:6px;flex:1}
+.tmr-p{flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff;font-family:'Heebo';font-size:12px;font-weight:600;cursor:pointer}
+.tmr-p:active{background:#E94560;border-color:#E94560}
+.tmr-c{width:36px;height:36px;border-radius:18px;border:none;background:rgba(255,255,255,.06);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.fab{position:fixed;bottom:calc(16px + var(--sB));left:14px;width:50px;height:50px;border-radius:25px;background:linear-gradient(135deg,#E94560,#c0392b);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 3px 16px rgba(233,69,96,.35);display:flex;align-items:center;justify-content:center;z-index:150}
+.fab:active{transform:scale(.9)}
 
-.search-input {
-  width: 100%;
-  padding: 13px 18px;
-  border-radius: 14px;
-  border: 2px solid rgba(233,69,96,0.2);
-  background: rgba(255,255,255,0.06);
-  color: #fff;
-  font-family: 'Heebo', sans-serif;
-  font-size: 15px;
-  outline: none;
-  direction: rtl;
-  transition: border-color 0.2s;
-}
-.search-input:focus { border-color: var(--red); }
-.search-input::placeholder { color: rgba(255,255,255,0.35); }
-
-.search-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px; }
-.search-tag {
-  padding: 5px 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: rgba(255,255,255,0.55);
-  font-family: 'Heebo', sans-serif;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.content {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 12px 14px calc(80px + var(--safe-bottom));
-}
-
-.progress-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 14px;
-}
-.progress-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.progress-bar { height: 7px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-.progress-done { text-align: center; margin-top: 8px; font-size: 13px; color: #2ecc71; font-weight: 700; }
-
-.wrist-warning {
-  background: rgba(243,156,18,0.1);
-  border: 1px solid rgba(243,156,18,0.25);
-  border-radius: 12px;
-  padding: 11px 14px;
-  margin-bottom: 14px;
-  font-size: 12px;
-  line-height: 1.7;
-}
-
-.section-header { display: flex; align-items: center; gap: 10px; padding: 12px 4px 8px; }
-.section-line { width: 4px; height: 22px; border-radius: 2px; }
-.section-title { font-size: 15px; font-weight: 700; color: #fff; }
-
-.ex-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  margin-bottom: 8px;
-  overflow: hidden;
-  transition: all 0.25s;
-  animation: slideIn 0.2s ease;
-}
-.ex-card.done { background: rgba(46,204,113,0.06); border-color: rgba(46,204,113,0.2); }
-
-.ex-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.ex-icon {
-  width: 40px; height: 40px;
-  border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.ex-info { flex: 1; min-width: 0; }
-.ex-name { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 2px; line-height: 1.3; }
-.ex-meta { font-size: 11px; color: var(--text2); display: flex; gap: 8px; flex-wrap: wrap; }
-.ex-day-badge { font-size: 10px; font-weight: 700; margin-top: 3px; }
-.ex-arrow { font-size: 12px; color: rgba(255,255,255,0.2); transition: transform 0.3s; flex-shrink: 0; }
-.ex-arrow.open { transform: rotate(180deg); }
-
-.ex-expanded { padding: 0 14px 14px; border-top: 1px solid rgba(255,255,255,0.05); }
-
-.ex-notes {
-  background: rgba(255,255,255,0.03);
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin: 10px 0;
-  font-size: 12px;
-  line-height: 1.7;
-  color: rgba(255,255,255,0.7);
-}
-
-.ex-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
-.ex-stat { border-radius: 10px; padding: 8px; text-align: center; }
-.ex-stat-label { font-size: 10px; color: var(--text2); margin-bottom: 1px; }
-.ex-stat-value { font-size: 17px; font-weight: 800; }
-
-.ex-actions { display: flex; gap: 8px; }
-
-.video-btn {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #FF0000, #CC0000);
-  color: #fff;
-  text-decoration: none;
-  font-family: 'Heebo', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  border: none;
-  box-shadow: 0 4px 15px rgba(255,0,0,0.2);
-  cursor: pointer;
-  -webkit-user-select: none;
-}
-.video-btn:active { transform: scale(0.97); }
-
-.done-btn {
-  width: 48px; height: 48px;
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.12);
-  background: transparent;
-  color: rgba(255,255,255,0.3);
-  font-size: 22px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-.done-btn.checked { border-color: #2ecc71; background: rgba(46,204,113,0.12); color: #2ecc71; }
-
-.timer-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: rgba(10,10,26,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding: 12px 16px calc(12px + var(--safe-bottom));
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  z-index: 200;
-  transform: translateY(100%);
-  transition: transform 0.3s ease;
-}
-.timer-bar.visible { transform: translateY(0); }
-
-.timer-display {
-  font-size: 32px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-  min-width: 80px;
-  text-align: center;
-}
-
-.timer-btns { display: flex; gap: 8px; flex: 1; }
-
-.timer-preset {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: #fff;
-  font-family: 'Heebo', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.timer-preset:active, .timer-preset.running { background: var(--red); border-color: var(--red); }
-
-.timer-close {
-  width: 40px; height: 40px;
-  border-radius: 20px;
-  border: none;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.timer-fab {
-  position: fixed;
-  bottom: calc(20px + var(--safe-bottom));
-  left: 16px;
-  width: 56px; height: 56px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, var(--red), #c0392b);
-  color: #fff;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(233,69,96,0.4);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 150;
-  transition: transform 0.2s;
-}
-.timer-fab:active { transform: scale(0.9); }
-
-.search-empty { text-align: center; padding: 50px 20px; color: rgba(255,255,255,0.35); }
-.search-empty-icon { font-size: 44px; margin-bottom: 12px; }
-.search-empty p { font-size: 14px; }
-.search-count { font-size: 12px; color: var(--text2); padding: 4px 4px 8px; }
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Video player styles */
-.vid-wrap { margin: 10px 0; border-radius: 12px; overflow: hidden; background: #000; position: relative; aspect-ratio: 16/9; }
-.vid-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
-.vid-thumb { width: 100%; height: 100%; position: relative; cursor: pointer; }
-.vid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.vid-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 64px; height: 64px; background: rgba(255,0,0,0.92); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-.vid-play::after { content: ''; border-left: 26px solid #fff; border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-right: -4px; }
-.vid-hint { text-align: center; font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; letter-spacing: 0.05em; }
-.vid-loading { display: flex; align-items: center; justify-content: center; height: 160px; color: rgba(255,255,255,.5); font-size: 13px; gap: 8px; }
-.vid-spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.1); border-top-color: var(--red); border-radius: 50%; animation: vspin .7s linear infinite; }
-@keyframes vspin { to { transform: rotate(360deg); } }
-.vid-err { text-align: center; padding: 12px; color: rgba(255,255,255,.45); font-size: 12px; margin: 10px 0; }
+/* Search */
+.s-in{width:100%;padding:11px 16px;border-radius:12px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff;font-family:'Heebo';font-size:14px;outline:none;direction:rtl}
+.s-in:focus{border-color:#E94560}
+.s-in::placeholder{color:rgba(255,255,255,.3)}
+.s-tags{display:flex;flex-wrap:wrap;gap:5px;padding:8px 0}
+.s-tag{padding:4px 10px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(255,255,255,.5);font-family:'Heebo';font-size:11px;cursor:pointer}
 </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
-const DAYS = [
-  {
-    id: "A", title: "יציבות + חוזק תחתון", icon: "🦵", color: "#E94560",
-    sections: [
-      { name: "חימום (10 דקות)", exercises: [
-        { name: "גלילת קצף על כדור טניס", sets: "2", reps: "60 שניות", rest: "-", notes: "לחזק קשת כף הרגל. לגלול לאט על כל אורך כף הרגל", video: "tennis ball foot roll arch flat feet", icon: "🎾" },
-        { name: "Toe Yoga — בוהן גדולה בלבד", sets: "2", reps: "10 לכל רגל", rest: "-", notes: "הרם רק את הבוהן הגדולה בזמן ששאר האצבעות על הרצפה, ואז הפוך", video: "toe yoga exercise big toe raise foot", icon: "🦶" },
-        { name: "עמידה על רגל אחת + מגבת", sets: "2", reps: "30 שניות/צד", rest: "-", notes: "יציבות קרסול + הפעלת כף רגל", video: "single leg balance towel exercise", icon: "🧘" },
-        { name: "Dead Bug", sets: "2", reps: "8 לכל צד", rest: "-", notes: "גב תחתון צמוד לרצפה! הפעלת ליבה עמוקה", video: "dead bug exercise core form", icon: "🪲" },
-      ]},
-      { name: "חלק עיקרי (55 דקות)", exercises: [
-        { name: "Goblet Squat — קטלבל", sets: "4", reps: "10-12", rest: "90", notes: "עקבים בחוץ, ברכיים בכיוון האצבעות. תודעת כף רגל — דרוך על 3 נקודות", video: "kettlebell goblet squat proper form", icon: "🏋️" },
-        { name: "Romanian Deadlift — דמבלסים", sets: "4", reps: "10", rest: "90", notes: "אחיזה ניייטרלית לנוחות שורש כף יד. ירכיים אחורה, גב ישר", video: "dumbbell romanian deadlift RDL form", icon: "💪" },
-        { name: "פיסוק בולגרי — דמבלס", sets: "3", reps: "12 לכל רגל", rest: "60", notes: "רגל אחורית על ספסל. ברך קדמית לא עוברת את האצבעות", video: "bulgarian split squat dumbbell form", icon: "🦿" },
-        { name: "Calf Raise על מדרגה", sets: "3", reps: "15-20", rest: "60", notes: "איטי! עצירה למעלה 2 שניות. ירידה איטית 3 שניות", video: "standing calf raise step slow eccentric", icon: "🔥" },
-        { name: "Pallof Press — כבלים", sets: "3", reps: "10 לכל צד", rest: "60", notes: "עמוד ישר, ידיים דוחפות קדימה. התנגד לסיבוב!", video: "pallof press cable anti rotation core", icon: "🎯" },
-      ]},
-      { name: "סיום (10 דקות)", exercises: [
-        { name: "90/90 Hip Stretch", sets: "2", reps: "60 שניות/צד", rest: "-", notes: "נשימה עמוקה. הרגש את המתיחה בירך", video: "90 90 hip stretch mobility exercise", icon: "🧘‍♂️" },
-        { name: "מתיחת שורש כף יד — קיר", sets: "2", reps: "30 שניות/צד", rest: "-", notes: "עדינות! שני כיוונים — כף כלפי מעלה וכלפי מטה", video: "wrist flexor extensor wall stretch", icon: "✋" },
-      ]},
-    ]
-  },
-  {
-    id: "B", title: "חוזק עליון", icon: "💪", color: "#0F3460",
-    sections: [
-      { name: "חימום (10 דקות)", exercises: [
-        { name: "Band Pull-Apart", sets: "2", reps: "15", rest: "-", notes: "שכמות ממושכות אחורה. הרגש את הגב העליון עובד", video: "band pull apart shoulder warmup form", icon: "🔴" },
-        { name: "סיבובי כתפיים עם מקל", sets: "2", reps: "10 לכל כיוון", rest: "-", notes: "תנועה רחבה ואיטית. אל תכריח טווח תנועה", video: "shoulder pass through stick mobility", icon: "🪄" },
-        { name: "Cat-Cow", sets: "2", reps: "8 מחזורים", rest: "-", notes: "מוביליות עמוד שדרה. תנשום עמוק", video: "cat cow stretch spinal mobility", icon: "🐱" },
-      ]},
-      { name: "חלק עיקרי (55 דקות)", exercises: [
-        { name: "Landmine Press — חד צדדי", sets: "4", reps: "10 לכל יד", rest: "90", notes: "⚠️ יד שמאל רגילה. ימין — אחיזה זהירה, אם כואב תעצור!", video: "single arm landmine press form tutorial", icon: "🚀" },
-        { name: "Cable Row — ישיבה", sets: "4", reps: "12", rest: "90", notes: "אחיזה ניייטרלית. לחץ שכמות אחורה בסוף התנועה", video: "seated cable row neutral grip form", icon: "🚣" },
-        { name: "TRX Row", sets: "3", reps: "12", rest: "60", notes: "גוף ישר כמו קרש. ככל שהרגליים קדימה — יותר קשה", video: "TRX inverted row proper form back", icon: "⛓️" },
-        { name: "Face Pull — כבלים", sets: "3", reps: "15", rest: "60", notes: "קריטי ליציבה! משוך לכיוון הפנים עם רוטציה חיצונית", video: "face pull cable external rotation form", icon: "🎯" },
-        { name: "Farmer's Walk — דמבלסים", sets: "3", reps: "30 מטר", rest: "60", notes: "כתפיים למטה ואחורה. ליבה מהודקת. צעדים קצרים", video: "farmers walk dumbbell form technique", icon: "🚶" },
-      ]},
-      { name: "סיום (10 דקות)", exercises: [
-        { name: "מתיחת חזה — Door Frame", sets: "2", reps: "45 שניות", rest: "-", notes: "ידיים על המשקוף בגובה כתפיים. צעד קדימה", video: "doorway chest stretch pec shoulder", icon: "🚪" },
-        { name: "Thoracic Extension על רולר", sets: "2", reps: "10 חזרות", rest: "-", notes: "רולר על גב עליון. ידיים מאחורי הראש. הינגע אחורה", video: "thoracic extension foam roller mobility", icon: "🔄" },
-      ]},
-    ]
-  },
-  {
-    id: "C", title: "מוביליות וגמישות", icon: "🧘", color: "#16A085",
-    sections: [
-      { name: "כפות רגליים (15 דקות)", exercises: [
-        { name: "גלילת כדור טניס יחף", sets: "3", reps: "60 שניות/צד", rest: "-", notes: "לחץ קל-בינוני. מקשת כף הרגל עד האצבעות", video: "tennis ball foot massage flat feet arch", icon: "🎾" },
-        { name: "Towel Scrunches — אצבעות", sets: "3", reps: "15", rest: "-", notes: "משוך מגבת לכיוונך רק עם אצבעות הרגליים", video: "towel scrunch exercise foot strengthen", icon: "🧣" },
-        { name: "עמידה על רגל אחת — עיניים עצומות", sets: "3", reps: "30 שניות/צד", rest: "-", notes: "אתגר יציבות אמיתי! אם נופל — פתח עיניים והמשך", video: "single leg balance eyes closed exercise", icon: "👁️" },
-      ]},
-      { name: "ירכיים וליבה (15 דקות)", exercises: [
-        { name: "90/90 Hip Flow", sets: "3", reps: "8 לכל צד", rest: "-", notes: "עבור בין צדדים בצורה זורמת. נשימה עמוקה", video: "90 90 hip flow mobility transitions", icon: "🔄" },
-        { name: "Deep Squat Hold + Thoracic Rotation", sets: "3", reps: "5 לכל צד", rest: "-", notes: "שב בסקוואט עמוק וסובב גוף עליון לצדדים", video: "deep squat thoracic rotation mobility", icon: "🏋️" },
-        { name: "Shoulder CARs", sets: "2", reps: "5 לכל כיוון", rest: "-", notes: "סיבוב מלא של הכתף. איטי ומבוקר!", video: "shoulder CARs controlled articular rotations", icon: "🔵" },
-        { name: "Wrist CARs + מתיחות", sets: "2", reps: "10 לכל כיוון", rest: "-", notes: "שיקום שורש כף יד. עדין!", video: "wrist CARs controlled articular rotations", icon: "✋" },
-      ]},
-      { name: "כתפיים ועמוד שדרה (15 דקות)", exercises: [
-        { name: "Open Books", sets: "3", reps: "8 לכל צד", rest: "-", notes: "שכב על הצד, סובב גוף עליון כמו ספר שנפתח", video: "open book stretch thoracic rotation", icon: "📖" },
-        { name: "Wall Slides", sets: "3", reps: "10", rest: "-", notes: "גב וידיים צמודים לקיר. החלק למעלה ולמטה", video: "wall slide exercise shoulder scapula", icon: "🧱" },
-        { name: "פלאנק צדדי", sets: "3", reps: "30 שניות/צד", rest: "-", notes: "גוף בקו ישר. ליבה מהודקת!", video: "side plank proper form core stability", icon: "📐" },
-        { name: "Bird Dog", sets: "3", reps: "8 לכל צד", rest: "-", notes: "יד ורגל נגדיים. שמור על גב ישר ויציב", video: "bird dog exercise core stability form", icon: "🐕" },
-      ]},
-      { name: "גמישות סטטית (15 דקות)", exercises: [
-        { name: "מתיחת ירכיים אחורית", sets: "3", reps: "45 שניות/צד", rest: "-", notes: "רגל ישרה על משטח גבוה או שכיבה. נשימה!", video: "hamstring stretch flexibility exercise", icon: "🦵" },
-        { name: "מתיחת כופף ירך (Hip Flexor)", sets: "3", reps: "45 שניות/צד", rest: "-", notes: "ברך על הרצפה. דחוף ירך קדימה. קריטי לעומדים הרבה!", video: "hip flexor stretch kneeling lunge", icon: "🏃" },
-        { name: "מתיחת חזה (Pec Stretch)", sets: "3", reps: "45 שניות/צד", rest: "-", notes: "פתיחת חזה נגד עמידה שפופה", video: "pec stretch doorway chest opener", icon: "🚪" },
-        { name: "מתיחת שורש כף יד + אצבעות", sets: "2", reps: "30 שניות/צד", rest: "-", notes: "עדינות! כיוון אחד ואז הפוך", video: "wrist flexor extensor stretch forearm", icon: "🖐️" },
-      ]},
-    ]
-  },
-  {
-    id: "D", title: "חוזק פונקציונלי מלא", icon: "⚡", color: "#8E44AD",
-    sections: [
-      { name: "חימום (10 דקות)", exercises: [
-        { name: "World's Greatest Stretch", sets: "2", reps: "5 לכל צד", rest: "-", notes: "צעד קדימה, יד לרצפה, סיבוב גוף עליון למעלה", video: "worlds greatest stretch full body mobility", icon: "🌍" },
-        { name: "Toe Yoga + הפעלת קשת", sets: "2", reps: "10/רגל", rest: "-", notes: "Short Foot — קצר את כף הרגל בלי לכופף אצבעות", video: "toe yoga short foot arch activation", icon: "🦶" },
-        { name: "הליכת דוב", sets: "2", reps: "20 מטר", rest: "-", notes: "על קצות האצבעות. הפעלת כל הגוף!", video: "bear crawl exercise warmup full body", icon: "🐻" },
-      ]},
-      { name: "חלק עיקרי (55 דקות)", exercises: [
-        { name: "Landmine Squat to Press", sets: "4", reps: "8 לכל יד", rest: "90", notes: "⚠️ תנועה מורכבת! סקוואט + לחיצה למעלה בתנועה אחת זורמת", video: "landmine squat to press single arm", icon: "🔥" },
-        { name: "KB Swing — קטלבל", sets: "4", reps: "15", rest: "60", notes: "כוח מהירכיים! לא מהידיים. קטלבל עולה מכוח הפיצוץ של הירכיים", video: "kettlebell swing proper form hip hinge", icon: "🔔" },
-        { name: "TRX Single Leg Squat", sets: "3", reps: "8 לכל רגל", rest: "60", notes: "אחוז ב-TRX לאיזון. שב על רגל אחת לעומק", video: "TRX assisted pistol squat single leg", icon: "🎯" },
-        { name: "Landmine Row — חד צדדי", sets: "3", reps: "10 לכל יד", rest: "60", notes: "⚠️ אחיזה ניייטרלית. נוחה יותר לשורש כף יד", video: "single arm landmine row form technique", icon: "💪" },
-        { name: "Turkish Get-Up — קטלבל קל", sets: "3", reps: "3 לכל צד", rest: "90", notes: "👑 תרגיל המלך! לאט לאט, שלב אחרי שלב. התחל קל!", video: "turkish get up kettlebell step by step", icon: "👑" },
-        { name: "Dead Hang — תלייה על מוט", sets: "3", reps: "מקסימום", rest: "60", notes: "פשוט תלה! דקומפרסיה לכתפיים + חיזוק אחיזה", video: "dead hang bar shoulder decompression grip", icon: "🦍" },
-      ]},
-      { name: "סיום (10 דקות)", exercises: [
-        { name: "מתיחת יונה (Pigeon)", sets: "2", reps: "60 שניות/צד", rest: "-", notes: "רגל קדמית מכופפת, רגל אחורית ישרה. נשום!", video: "pigeon stretch hip opener flexibility", icon: "🕊️" },
-        { name: "נשימה עמוקה — סיום", sets: "2", reps: "90 שניות", rest: "-", notes: "שכב על הגב. 4 שניות שאיפה, 4 שניות נשיפה. הרגע!", video: "diaphragmatic breathing cool down relax", icon: "🧘‍♂️" },
-      ]},
-    ]
-  }
+// ===========================
+// HARDCODED VIDEO IDs
+// ===========================
+var VM = {
+  "band+pull+apart+warmup":                  "smSSXITNpCI",
+  "shoulder+CARs+controlled+articular":      "9FFiaMIkcNY",
+  "toe+yoga+short+foot+arch":                "SbQ2RYxbppE",
+  "landmine+press+single+arm+form":          "TY_zsi0kOyI",
+  "incline+dumbbell+press+neutral+grip":     "SMO17ItT5Wc",
+  "cable+fly+chest+crossover+form":          "D9dh1jKBlXY",
+  "landmine+squat+to+press+single+arm":      "WMkebvu4exo",
+  "dumbbell+lateral+raise+form":             "Y29xKcze8Ik",
+  "tricep+pushdown+rope+cable+form":         "qHDrQglWgS4",
+  "pallof+press+cable+anti+rotation":        "xeFp4MXad98",
+  "landmine+rotation+twist+core+obliques":   "MswsBPLGhE8",
+  "doorway+chest+stretch+wrist+stretch":     "B9uY01NoqBg",
+  "cat+cow+stretch+spinal":                  "xyNwxiuERXc",
+  "band+pull+apart+rear+delt":               "smSSXITNpCI",
+  "tennis+ball+foot+roll+arch":              "N9ERNNM-i4M",
+  "seated+cable+row+neutral+grip+form":      "GZbfZ033f74",
+  "lat+pulldown+wide+grip+form":             "7JnP8dFbS14",
+  "face+pull+cable+external+rotation":       "aeEAYMPBuAI",
+  "single+arm+dumbbell+row+form":            "H72k2iGxX_g",
+  "hammer+curl+dumbbell+neutral+grip":       "-Vx0SZal_sE",
+  "dead+hang+bar+decompression":             "2vspW4N4BMs",
+  "thoracic+extension+foam+roller":          "SQF-0s1CckA",
+  "tennis+ball+foot+roll+toe+yoga":          "N9ERNNM-i4M",
+  "dead+bug+exercise+core":                  "XcYtWYMz39w",
+  "single+leg+balance":                      "FiGogr7-Xeg",
+  "barbell+back+squat+proper+form+depth":    "SW_C1A-rejs",
+  "kettlebell+goblet+squat+form":            "BR4tlEE_A98",
+  "dumbbell+romanian+deadlift+form":         "IJdUtnxAmNo",
+  "bulgarian+split+squat+dumbbell":          "hiLF_pF3EJM",
+  "calf+raise+slow+eccentric+step":          "JbyjNymZOt0",
+  "side+plank+proper+form":                  "XeN4pEZZJNI",
+  "landmine+anti+rotation+hold+isometric+core": "8aXStDm3cOs",
+  "landmine+rainbow+arc+core+rotation":      "911qQuwcEMQ",
+  "farmers+walk+dumbbell":                   "E94UNm8fD-4",
+  "90+90+hip+stretch":                       "t4Zz6-aG8Iw",
+  "tennis+ball+foot+massage+flat+feet":      "N9ERNNM-i4M",
+  "towel+scrunch+foot+exercise":             "1ogSryKJXB4",
+  "single+leg+balance+eyes+closed":          "FiGogr7-Xeg",
+  "90+90+hip+flow+mobility":                 "qSMwK1MDEh4",
+  "deep+squat+thoracic+rotation":            "enThal66tUs",
+  "open+book+thoracic+stretch":              "peeW19ofFUg",
+  "shoulder+CARs+controlled":                "9FFiaMIkcNY",
+  "wall+slide+shoulder+scapula":             "tWDGEyMWv10",
+  "wrist+CARs+stretches+mobility":           "KdM1KlmVgek",
+  "pigeon+stretch+hip+opener":               "aj1gSKUQPWg",
+  "hip+flexor+stretch+kneeling":             "iZ1eZBY4fwM",
+  "chest+stretch+hamstring+stretch":         "5P3E8Pec_L8",
+  "wrist+flexor+extensor+stretch":           "rQlDHgTUbO0",
+  "box+breathing+4+7+8":                     "LiUnFJ8P4gM"
+};
+
+// ===========================
+// TRAINING DATA — PPL + Mobility
+// ===========================
+var DAYS = [
+// ========== DAY A: PUSH ==========
+{id:"A",t:"Push — חזה, כתפיים, טרייספס",ic:"💥",co:"#E94560",sc:[
+  {nm:"חימום (8 דקות)",ex:[
+    {n:"Band Pull-Apart",s:"2",r:"15",rest:"-",nt:"הפעלת שכמות + אחורי כתף. מונע פציעות כתפיים",v:"band+pull+apart+warmup",ic:"🔴",mu:"שכמה, אחורי כתף"},
+    {n:"Shoulder CARs",s:"1",r:"5/כיוון",rest:"-",nt:"סיבוב מלא של הכתף. איטי ומבוקר",v:"shoulder+CARs+controlled+articular",ic:"🔄",mu:"כתפיים"},
+    {n:"Toe Yoga + Short Foot",s:"1",r:"10/רגל",rest:"-",nt:"הפעלת קשת כף רגל — בכל אימון!",v:"toe+yoga+short+foot+arch",ic:"🦶",mu:"כף רגל"},
+  ]},
+  {nm:"חלק עיקרי",ex:[
+    {n:"Landmine Press — חד צדדי",s:"4",r:"10/יד",rest:"90",nt:"⚠️ יד ימין בזהירות. חליפה עולה ל-Overhead Press למי שיש בעיות כתף",v:"landmine+press+single+arm+form",ic:"🚀",mu:"חזה עליון, כתף קדמי, טריי"},
+    {n:"Incline DB Press",s:"4",r:"10",rest:"90",nt:"⚠️ אחיזה ניטרלית או אגרופים לנוחות שורש כף יד. ספסל ב-30°",v:"incline+dumbbell+press+neutral+grip",ic:"💪",mu:"חזה עליון, כתף קדמי"},
+    {n:"Cable Fly / Crossover",s:"3",r:"12-15",rest:"60",nt:"תנועה איטית. דחיסה במרכז",v:"cable+fly+chest+crossover+form",ic:"🎯",mu:"חזה"},
+    {n:"Landmine Squat to Press",s:"3",r:"8/יד",rest:"90",nt:"תנועה מורכבת — סקוואט + לחיצה. כוח מהרגליים לכתפיים. ⚠️ יד ימין בזהירות",v:"landmine+squat+to+press+single+arm",ic:"🔥",mu:"קוודרי, כתף, ליבה (compound)"},
+    {n:"Lateral Raise — דמבלסים",s:"3",r:"12-15",rest:"60",nt:"לא להרים מעל גובה הכתפיים",v:"dumbbell+lateral+raise+form",ic:"🙌",mu:"כתף אמצעי"},
+    {n:"Tricep Pushdown — כבלים",s:"3",r:"12",rest:"60",nt:"⚠️ אחיזת חבל — נוח לשורש כף יד. מרפקים צמודים",v:"tricep+pushdown+rope+cable+form",ic:"💥",mu:"טריייספס"},
+  ]},
+  {nm:"ליבה + סיום",ex:[
+    {n:"Pallof Press",s:"3",r:"10/צד",rest:"45",nt:"אנטי רוטציה — התנגד לסיבוב!",v:"pallof+press+cable+anti+rotation",ic:"🎯",mu:"ליבה (anti-rotation)"},
+    {n:"Landmine Rotation",s:"3",r:"10/צד",rest:"60",nt:"אחוז בקצה של הברבל, סובב מצד לצד בשליטה. כוח מהליבה + ירכיים!",v:"landmine+rotation+twist+core+obliques",ic:"🌀",mu:"אובליקים, ליבה (rotational)"},
+    {n:"מתיחת חזה + שורש כף יד",s:"2",r:"30ש/צד",rest:"-",nt:"משקוף דלת + מתיחה עדינה לשורש כף יד",v:"doorway+chest+stretch+wrist+stretch",ic:"🚪",mu:"חזה, שורש כף יד"},
+  ]}
+]},
+
+// ========== DAY B: PULL ==========
+{id:"B",t:"Pull — גב, ביייספס, אחורי כתף",ic:"🦷",co:"#2980B9",sc:[
+  {nm:"חימום (8 דקות)",ex:[
+    {n:"Cat-Cow",s:"2",r:"8",rest:"-",nt:"מוביליות עמוד שדרה + נשימה",v:"cat+cow+stretch+spinal",ic:"🐱",mu:"עמוד שדרה"},
+    {n:"Band Pull-Apart",s:"2",r:"15",rest:"-",nt:"הפעלת שכמות ואחורי כתף",v:"band+pull+apart+rear+delt",ic:"🔴",mu:"שכמה, אחורי כתף"},
+    {n:"כדור טניס לכף רגל",s:"1",r:"60ש/צד",rest:"-",nt:"הפעלת קשת כף רגל",v:"tennis+ball+foot+roll+arch",ic:"🎾",mu:"כף רגל"},
+  ]},
+  {nm:"חלק עיקרי",ex:[
+    {n:"Cable Row — ישיבה, אחיזה ניטרלית",s:"4",r:"12",rest:"90",nt:"לחץ שכמות אחורה בסוף. אחיזה ניטרלית לנוחות שורש כף יד",v:"seated+cable+row+neutral+grip+form",ic:"🚣",mu:"גב אמצעי, לטס"},
+    {n:"Lat Pulldown — רחב",s:"4",r:"10-12",rest:"90",nt:"משיכה מלמעלה, לחץ שכמות למטה. לא למשוך אחורי צוואר",v:"lat+pulldown+wide+grip+form",ic:"💪",mu:"לטס, גב עליון"},
+    {n:"Face Pull",s:"3",r:"15",rest:"60",nt:"קריטי ליציבות כתף! רוטציה חיצונית בסוף",v:"face+pull+cable+external+rotation",ic:"🎯",mu:"אחורי כתף, שכמה"},
+    {n:"Single Arm DB Row",s:"3",r:"10/יד",rest:"60",nt:"⚠️ יד ימין — אחיזה ניטרלית או רצועת פתוחה",v:"single+arm+dumbbell+row+form",ic:"💪",mu:"לטס, גב אמצעי"},
+    {n:"Hammer Curl",s:"3",r:"12",rest:"60",nt:"⚠️ אחיזה ניטרלית — נוח לשורש כף יד",v:"hammer+curl+dumbbell+neutral+grip",ic:"💥",mu:"ביייספס, אמה קדמית"},
+  ]},
+  {nm:"ליבה + סיום",ex:[
+    {n:"Dead Hang",s:"3",r:"מקסימום",rest:"45",nt:"דקומפרסיה + אחיזה + יציבות כתף",v:"dead+hang+bar+decompression",ic:"🦧",mu:"אחיזה, כתפיים"},
+    {n:"Thoracic Extension על רולר",s:"2",r:"10",rest:"-",nt:"פתיחת גב עליון וכתפיים",v:"thoracic+extension+foam+roller",ic:"🔄",mu:"עמוד שדרה"},
+  ]}
+]},
+
+// ========== DAY C: LEGS + CORE ==========
+{id:"C",t:"Legs + Core — רגליים + ליבה",ic:"🦵",co:"#27AE60",sc:[
+  {nm:"חימום (8 דקות)",ex:[
+    {n:"כדור טניס + Toe Yoga",s:"2",r:"60ש/רגל",rest:"-",nt:"גלילה על קשת + הפעלת אצבעות",v:"tennis+ball+foot+roll+toe+yoga",ic:"🎾",mu:"כף רגל"},
+    {n:"Dead Bug",s:"2",r:"8/צד",rest:"-",nt:"גב תחתון צמוד לרצפה!",v:"dead+bug+exercise+core",ic:"🪲",mu:"ליבה עמוקה"},
+    {n:"עמידה על רגל אחת",s:"1",r:"30ש/צד",rest:"-",nt:"יציבות קרסול. תודעת כף רגל",v:"single+leg+balance",ic:"🧘",mu:"קרסול, כף רגל"},
+  ]},
+  {nm:"חלק עיקרי — רגליים",ex:[
+    {n:"Barbell Back Squat",s:"4",r:"8-10",rest:"120",nt:"תרגיל המלך! עומק מלא על הרצפה, חזה מהודק, ברכיים בכיוון אצבעות. תודעת 3 נקודות!",v:"barbell+back+squat+proper+form+depth",ic:"👑",mu:"קוודרי, גלוטאלי, המסטרינגס, ליבה"},
+    {n:"Goblet Squat — קטלבל",s:"3",r:"12",rest:"60",nt:"תרגיל משלים אחרי ה-Back Squat. עקביים בחוץ, 3 נקודות",v:"kettlebell+goblet+squat+form",ic:"🏋️",mu:"קווודרי, גלוטאלי"},
+    {n:"Romanian Deadlift — דמבלסים",s:"4",r:"10",rest:"90",nt:"אחיזה ניטרלית. ירכיים אחורה, גב ישר!",v:"dumbbell+romanian+deadlift+form",ic:"🔥",mu:"המסטרינגס, גלוטאלי, גב תחתון"},
+    {n:"פיסוק בולגרי — דמבלס",s:"3",r:"10/רגל",rest:"60",nt:"רגל אחורית על ספסל. יציבות!",v:"bulgarian+split+squat+dumbbell",ic:"🦿",mu:"קווודרי, גלוטאלי, יציבות"},
+    {n:"Calf Raise על מדרגה",s:"3",r:"15-20",rest:"60",nt:"איטי! 2ש למעלה, 3ש ירידה. קריטי לפלטפוס",v:"calf+raise+slow+eccentric+step",ic:"🦶",mu:"שוק, קרסול"},
+  ]},
+  {nm:"ליבה + סיום",ex:[
+    {n:"פלאנק צדדי",s:"3",r:"30ש/צד",rest:"30",nt:"גוף בקו ישר! ליבה מהודקת",v:"side+plank+proper+form",ic:"📐",mu:"אובליקים, ליבה"},
+    {n:"Landmine Anti-Rotation Hold",s:"3",r:"20ש/צד",rest:"45",nt:"איזומטרי! החזק את הברבל מולך בידיים ישרות. התנגד לסיבוב בלי לזוז!",v:"landmine+anti+rotation+hold+isometric+core",ic:"🧊",mu:"ליבה (isometric anti-rotation)"},
+    {n:"Landmine Rainbow",s:"3",r:"8/צד",rest:"60",nt:"קשת — העבר את הברבל מצד לצד בקשת מעל הראש. רוטציה מבוקרת + אנטי לטרל",v:"landmine+rainbow+arc+core+rotation",ic:"🌈",mu:"אובליקים, ליבה (rotational + anti-lateral)"},
+    {n:"Farmer's Walk",s:"3",r:"30מ",rest:"60",nt:"כתפיים למטה, ליבה מהודקת, צעדים קצרים",v:"farmers+walk+dumbbell",ic:"🚶",mu:"ליבה, אחיזה, טרפז"},
+    {n:"90/90 Hip Stretch",s:"2",r:"45ש/צד",rest:"-",nt:"פתיחת ירכיים אחרי עבודה כבדה",v:"90+90+hip+stretch",ic:"🧘‍♂️",mu:"ירכיים"},
+  ]}
+]},
+
+// ========== DAY D: MOBILITY ==========
+{id:"D",t:"Mobility — מוביליות + שיקום",ic:"🧘",co:"#8E44AD",sc:[
+  {nm:"כפות רגליים (15 דק)",ex:[
+    {n:"כדור טניס יחף",s:"3",r:"60ש/צד",rest:"-",nt:"לחץ קל-בינוני. מקשת עד אצבעות",v:"tennis+ball+foot+massage+flat+feet",ic:"🎾",mu:"כף רגל"},
+    {n:"Towel Scrunches",s:"3",r:"15",rest:"-",nt:"חיזוק שרירי כף רגל",v:"towel+scrunch+foot+exercise",ic:"🧣",mu:"שרירי כף רגל"},
+    {n:"עמידה רגל אחת — עיניים עצומות",s:"3",r:"30ש/צד",rest:"-",nt:"אתגר יציבות מקסימלי!",v:"single+leg+balance+eyes+closed",ic:"👁️",mu:"קרסול, יציבות"},
+  ]},
+  {nm:"ירכיים + עמוד שדרה (15 דק)",ex:[
+    {n:"90/90 Hip Flow",s:"3",r:"8/צד",rest:"-",nt:"עבור בין צדדים בצורה זורמת",v:"90+90+hip+flow+mobility",ic:"🔄",mu:"ירכיים"},
+    {n:"Deep Squat + Thoracic Rotation",s:"3",r:"5/צד",rest:"-",nt:"סקוואט עמוק + סיבוב למעלה",v:"deep+squat+thoracic+rotation",ic:"🏋️",mu:"ירכיים, עמוד שדרה"},
+    {n:"Open Books",s:"3",r:"8/צד",rest:"-",nt:"שכב על הצד, סובב גוף עליון",v:"open+book+thoracic+stretch",ic:"📖",mu:"עמוד שדרה חזי"},
+  ]},
+  {nm:"כתפיים + שורש כף יד (10 דק)",ex:[
+    {n:"Shoulder CARs",s:"2",r:"5/כיוון",rest:"-",nt:"סיבוב מלא איטי!",v:"shoulder+CARs+controlled",ic:"🔵",mu:"כתפיים"},
+    {n:"Wall Slides",s:"3",r:"10",rest:"-",nt:"גב+ידיים צמודים לקיר. יציבות שכמה",v:"wall+slide+shoulder+scapula",ic:"🧱",mu:"שכמה"},
+    {n:"Wrist CARs + מתיחות",s:"2",r:"10/כיוון",rest:"-",nt:"שיקום שורש כף יד. עדינות!",v:"wrist+CARs+stretches+mobility",ic:"✋",mu:"שורש כף יד"},
+  ]},
+  {nm:"גמישות סטטית (15 דק)",ex:[
+    {n:"מתיחת יונה (Pigeon)",s:"2",r:"60ש/צד",rest:"-",nt:"ירכיים + גלוטאלי",v:"pigeon+stretch+hip+opener",ic:"🕊️",mu:"ירכיים, גלוטאלי"},
+    {n:"מתיחת Hip Flexor",s:"2",r:"45ש/צד",rest:"-",nt:"קריטי למי שעומד הרבה!",v:"hip+flexor+stretch+kneeling",ic:"🏃",mu:"כופף ירך"},
+    {n:"מתיחת חזה + ירכיים אחורית",s:"2",r:"45ש/צד",rest:"-",nt:"שלושה כיוונים: משקוף, רצפה, קיר",v:"chest+stretch+hamstring+stretch",ic:"🚪",mu:"חזה, ירכיים אחורית"},
+    {n:"מתיחת שורש כף יד",s:"2",r:"30ש/צד",rest:"-",nt:"שני כיוונים. עדינות!",v:"wrist+flexor+extensor+stretch",ic:"🖐️",mu:"שורש כף יד"},
+    {n:"נשימה עמוקה — סיום",s:"1",r:"2 דקות",rest:"-",nt:"4 שאיפה, 7 החזקה, 8 נשיפה. הרגע!",v:"box+breathing+4+7+8",ic:"🧘‍♂️",mu:"מערכת עצבים"},
+  ]}
+]}
 ];
 
-// Flatten for search
-const allExercises = [];
-DAYS.forEach(day => {
-  day.sections.forEach(sec => {
-    sec.exercises.forEach(ex => {
-      allExercises.push({ ...ex, dayId: day.id, dayTitle: day.title, dayColor: day.color, sectionName: sec.name });
+// Flatten all exercises (for search)
+var allEx = [];
+DAYS.forEach(function(d){
+  d.sc.forEach(function(s){
+    s.ex.forEach(function(e){
+      allEx.push({n:e.n,s:e.s,r:e.r,rest:e.rest,nt:e.nt,v:e.v,ic:e.ic,mu:e.mu,di:d.id,dt:d.t,dc:d.co,sn:s.nm});
     });
   });
 });
 
-// STATE
-let state = {
-  activeDay: "A",
-  view: "plan",
-  search: "",
-  expandedEx: null,
-  completed: JSON.parse(localStorage.getItem("nc_completed") || "{}"),
-  timerVisible: false,
-  timerSeconds: 0,
-  timerRunning: false,
-  timerInterval: null,
-};
+// State
+var S = {d:"A",v:"plan",q:"",x:null,dn:{}};
+try { S.dn = JSON.parse(localStorage.getItem("ppl1") || "{}"); } catch(e) {}
+function sv() { try { localStorage.setItem("ppl1", JSON.stringify(S.dn)); } catch(e) {} }
 
-function saveCompleted() {
-  try { localStorage.setItem("nc_completed", JSON.stringify(state.completed)); } catch(e) {}
+// Timer
+var TI = null, TS = 0, TR = false, TV = false;
+function stT(s) {
+  clearInterval(TI); TS = s; TR = true; TV = true;
+  TI = setInterval(function(){
+    TS--;
+    if (TS <= 0) {
+      clearInterval(TI); TR = false; TS = 0;
+      try { navigator.vibrate([200,100,200,100,200]); } catch(e) {}
+    }
+    // update timer display in-place
+    var td = document.querySelector('.tmr-d');
+    if (td) td.textContent = fT(TS);
+    if (td) td.style.color = (TS <= 5 && TR) ? '#E94560' : '#fff';
+  }, 1000);
+  var tmr = document.querySelector('.tmr');
+  if (tmr) tmr.classList.add('v');
+  var fab = document.querySelector('.fab');
+  if (fab) fab.style.display = 'none';
+  var td = document.querySelector('.tmr-d');
+  if (td) td.textContent = fT(TS);
 }
-
-function getYouTubeUrl(query) {
-  return "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
+function spT() {
+  clearInterval(TI); TR = false; TV = false;
+  var tmr = document.querySelector('.tmr');
+  if (tmr) tmr.classList.remove('v');
+  var fab = document.querySelector('.fab');
+  if (fab) fab.style.display = 'flex';
 }
+function fT(s) { return Math.floor(s/60) + ":" + (s%60).toString().padStart(2,"0"); }
 
-// VIDEO SYSTEM - hardcoded YouTube video IDs per exercise
-// Key = exercise video search string
-var VIDEO_MAP = {
-  // Day A warmup
-  "tennis ball foot roll arch flat feet":        "N9ERNNM-i4M",
-  "toe yoga exercise big toe raise foot":         "SbQ2RYxbppE",
-  "single leg balance towel exercise":            "FiGogr7-Xeg",
-  "dead bug exercise core form":                  "XcYtWYMz39w",
-  // Day A main
-  "kettlebell goblet squat proper form":          "BR4tlEE_A98",
-  "dumbbell romanian deadlift RDL form":          "IJdUtnxAmNo",
-  "bulgarian split squat dumbbell form":          "hiLF_pF3EJM",
-  "standing calf raise step slow eccentric":      "JbyjNymZOt0",
-  "pallof press cable anti rotation core":        "xeFp4MXad98",
-  // Day A cooldown
-  "90 90 hip stretch mobility exercise":          "t4Zz6-aG8Iw",
-  "wrist flexor extensor wall stretch":           "rQlDHgTUbO0",
-  // Day B warmup
-  "band pull apart shoulder warmup form":         "smSSXITNpCI",
-  "shoulder pass through stick mobility":         "l5mCHgf8nwQ",
-  "cat cow stretch spinal mobility":              "xyNwxiuERXc",
-  // Day B main
-  "single arm landmine press form tutorial":      "TY_zsi0kOyI",
-  "seated cable row neutral grip form":           "GZbfZ033f74",
-  "TRX inverted row proper form back":            "iT_oaf3k0Xw",
-  "face pull cable external rotation form":       "aeEAYMPBuAI",
-  "farmers walk dumbbell form technique":         "E94UNm8fD-4",
-  // Day B cooldown
-  "doorway chest stretch pec shoulder":           "B9uY01NoqBg",
-  "thoracic extension foam roller mobility":      "SQF-0s1CckA",
-  // Day C - feet
-  "tennis ball foot massage flat feet arch":      "N9ERNNM-i4M",
-  "towel scrunch exercise foot strengthen":       "1ogSryKJXB4",
-  "single leg balance eyes closed exercise":      "FiGogr7-Xeg",
-  // Day C - hips & core
-  "90 90 hip flow mobility transitions":          "qSMwK1MDEh4",
-  "deep squat thoracic rotation mobility":        "enThal66tUs",
-  "shoulder CARs controlled articular rotations": "9FFiaMIkcNY",
-  "wrist CARs controlled articular rotations":    "KdM1KlmVgek",
-  // Day C - shoulders & spine
-  "open book stretch thoracic rotation":          "peeW19ofFUg",
-  "wall slide exercise shoulder scapula":         "tWDGEyMWv10",
-  "side plank proper form core stability":        "XeN4pEZZJNI",
-  "bird dog exercise core stability form":        "wcpHuv5DMWg",
-  // Day C - static flexibility
-  "hamstring stretch flexibility exercise":       "5P3E8Pec_L8",
-  "hip flexor stretch kneeling lunge":            "iZ1eZBY4fwM",
-  "pec stretch doorway chest opener":             "B9uY01NoqBg",
-  "wrist flexor extensor stretch forearm":        "rQlDHgTUbO0",
-  // Day D warmup
-  "worlds greatest stretch full body mobility":   "T6j7BpxeqqU",
-  "toe yoga short foot arch activation":          "SbQ2RYxbppE",
-  "bear crawl exercise warmup full body":         "pjayILfTzbQ",
-  // Day D main
-  "landmine squat to press single arm":           "WMkebvu4exo",
-  "kettlebell swing proper form hip hinge":       "h-A7HiTNZ5c",
-  "TRX assisted pistol squat single leg":         "HqCHXb91yMQ",
-  "single arm landmine row form technique":       "tiETx7VNDf0",
-  "turkish get up kettlebell step by step":       "lpltjWHd0ek",
-  "dead hang bar shoulder decompression grip":    "2vspW4N4BMs",
-  // Day D cooldown
-  "pigeon stretch hip opener flexibility":        "aj1gSKUQPWg",
-  "diaphragmatic breathing cool down relax":      "tpwWnuQiYnU"
-};
-
+// Video system
 var vidPlay = {};
-var exMap = {}; // key -> {ex, color} for in-place card updates
+var exMap = {};
 
 function playVideo(key, vid) {
   vidPlay[key] = true;
@@ -563,312 +317,201 @@ function playVideo(key, vid) {
   }
 }
 
-function videoHtml(key, query) {
-  var vid = VIDEO_MAP[query] || null;
-
-  if (!vid) {
-    // No hardcoded ID — show YouTube search link as fallback
-    return '<div class="vid-err">🎬 <a href="https://www.youtube.com/results?search_query=' +
-      encodeURIComponent(query + " exercise tutorial") +
-      '" target="_blank" style="color:#E94560">חפש הדגמה ב-YouTube</a></div>';
-  }
+function videoHtml(key, vq) {
+  var vid = VM[vq] || null;
+  if (!vid) return '<div style="text-align:center;padding:8px;font-size:11px;color:rgba(255,255,255,.3)">🎬 אין הדגמה לתרגיל זה</div>';
 
   if (vidPlay[key]) {
-    return '<div class="vid-wrap" id="vid-' + key + '"><iframe src="https://www.youtube-nocookie.com/embed/' +
-      vid + '?autoplay=1&rel=0&modestbranding=1&playsinline=1" ' +
-      'allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe></div>';
+    return '<div class="vid-wrap" id="vid-' + key + '"><iframe src="https://www.youtube-nocookie.com/embed/' + vid +
+      '?autoplay=1&rel=0&modestbranding=1&playsinline=1" allowfullscreen ' +
+      'allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe></div>' +
+      '<div class="vid-hint">🎬 הסרטון מתנגן בתוך האפליקציה</div>';
   }
 
-  // Thumbnail + play button — passes vid ID directly so playVideo can swap in-place
   var thumb = "https://img.youtube.com/vi/" + vid + "/mqdefault.jpg";
   return '<div class="vid-wrap" id="vid-' + key + '"><div class="vid-thumb" onclick="event.stopPropagation();playVideo(\'' +
     key + '\',\'' + vid + '\')">' +
-    '<img src="' + thumb + '" alt="תצוגה מקדימה">' +
+    '<img src="' + thumb + '" alt="הדגמה">' +
     '<div class="vid-play"></div>' +
     '</div></div>' +
     '<div class="vid-hint">לחץ ▶️ לצפייה בתוך האפליקציה</div>';
 }
 
-window.playVideo = playVideo;
-
-// TIMER
-function startTimer(seconds) {
-  clearInterval(state.timerInterval);
-  state.timerSeconds = seconds;
-  state.timerRunning = true;
-  state.timerVisible = true;
-  state.timerInterval = setInterval(function() {
-    state.timerSeconds--;
-    if (state.timerSeconds <= 0) {
-      clearInterval(state.timerInterval);
-      state.timerRunning = false;
-      state.timerSeconds = 0;
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-    }
-    render();
-  }, 1000);
-  render();
-}
-
-function stopTimer() {
-  clearInterval(state.timerInterval);
-  state.timerRunning = false;
-  state.timerVisible = false;
-  render();
-}
-
-function formatTime(s) {
-  var m = Math.floor(s / 60);
-  var sec = s % 60;
-  return m + ":" + (sec < 10 ? "0" : "") + sec;
-}
-
-// RENDER
-function render() {
-  var _scrollY = window.scrollY || window.pageYOffset || 0;
-  var app = document.getElementById("app");
-  var day = DAYS.find(function(d){ return d.id === state.activeDay; });
-  var isSearch = state.view === "search";
-
-  var searchResults = [];
-  if (isSearch && state.search.trim()) {
-    var q = state.search.toLowerCase();
-    allExercises.forEach(function(ex) {
-      if (ex.name.toLowerCase().includes(q) || ex.notes.toLowerCase().includes(q) || ex.sectionName.toLowerCase().includes(q)) {
-        searchResults.push(ex);
-      }
-    });
-  }
-
-  var total = 0, done = 0;
-  if (day) {
-    day.sections.forEach(function(sec) {
-      sec.exercises.forEach(function(ex, i) {
-        total++;
-        if (state.completed[day.id + "-" + sec.name + "-" + i]) done++;
-      });
-    });
-  }
-  var pct = total > 0 ? Math.round((done / total) * 100) : 0;
-
-  var html = "";
-
-  // Header
-  html += '<div class="header"><div class="header-top"><div><h1>💪 תוכנית אימון</h1><div class="header-sub">בנייה מהיסודות | יציבות → חוזק → מוביליות</div></div>';
-  html += '<div class="view-toggle">';
-  html += '<button class="view-btn ' + (!isSearch ? 'active' : '') + '" onclick="switchView(\'plan\')">📋</button>';
-  html += '<button class="view-btn ' + (isSearch ? 'active' : '') + '" onclick="switchView(\'search\')">🔍</button>';
-  html += '</div></div>';
-
-  if (!isSearch) {
-    html += '<div class="day-tabs">';
-    DAYS.forEach(function(d) {
-      html += '<button class="day-tab ' + (d.id === state.activeDay ? 'active' : '') + '" onclick="switchDay(\'' + d.id + '\')">' + d.icon + ' יום ' + d.id + '</button>';
-    });
-    html += '</div>';
-  }
-  html += '</div>';
-
-  // Content
-  html += '<div class="content" id="content">';
-
-  if (isSearch) {
-    html += '<div class="search-bar"><input class="search-input" type="text" placeholder="🔍 חפש תרגיל..." value="' + escHtml(state.search) + '" oninput="onSearch(this.value)" autofocus></div>';
-    if (!state.search.trim()) {
-      html += '<div class="search-tags">';
-      ["squat", "ליבה", "כתפיים", "stretch", "TRX", "Landmine", "קטלבל", "רגל", "ירך"].forEach(function(tag) {
-        html += '<button class="search-tag" onclick="onSearch(\'' + tag + '\')">' + tag + '</button>';
-      });
-      html += '</div>';
-      html += '<div class="search-empty"><div class="search-empty-icon">🔍</div><p>חפש תרגיל לפי שם או קבוצת שרירים</p></div>';
-    } else {
-      html += '<div class="search-count">' + searchResults.length + ' תוצאות</div>';
-      searchResults.forEach(function(ex, i) {
-        html += renderExCard(ex, "search-" + i, ex.dayColor, true);
-      });
-    }
-  } else {
-    // Progress
-    html += '<div class="progress-card">';
-    html += '<div class="progress-top"><span>' + day.icon + ' יום ' + day.id + ' — ' + day.title + '</span>';
-    html += '<span style="color:' + day.color + ';font-weight:700">' + done + '/' + total + '</span></div>';
-    html += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:' + day.color + '"></div></div>';
-    if (pct === 100) html += '<div class="progress-done">🎉 סיימת! כל הכבוד!</div>';
-    html += '</div>';
-
-    if (day.id === "B" || day.id === "D") {
-      html += '<div class="wrist-warning">⚠️ <strong>שורש כף יד ימין:</strong> בתרגילים שדורשים אחיזת כף יד פתוחה — השתמש באגרופים, Push-Up Handles, או אחיזת EZ-Bar. אם כואב — תעצור!</div>';
-    }
-
-    day.sections.forEach(function(sec) {
-      html += '<div class="section-header"><div class="section-line" style="background:' + day.color + '"></div><div class="section-title">' + sec.name + '</div></div>';
-      sec.exercises.forEach(function(ex, ei) {
-        var key = day.id + "-" + sec.name + "-" + ei;
-        html += renderExCard(ex, key, day.color, false);
-      });
-    });
-  }
-
-  html += '</div>'; // content
-
-  if (!state.timerVisible) {
-    html += '<button class="timer-fab" onclick="showTimer()">⏱</button>';
-  }
-
-  html += '<div class="timer-bar ' + (state.timerVisible ? 'visible' : '') + '">';
-  html += '<div class="timer-display" style="color:' + (state.timerSeconds <= 5 && state.timerRunning ? '#E94560' : '#fff') + '">' + formatTime(state.timerSeconds) + '</div>';
-  html += '<div class="timer-btns">';
-  html += '<button class="timer-preset ' + (state.timerRunning ? 'running' : '') + '" onclick="startTimer(60)">60ש</button>';
-  html += '<button class="timer-preset ' + (state.timerRunning ? 'running' : '') + '" onclick="startTimer(90)">90ש</button>';
-  html += '<button class="timer-preset ' + (state.timerRunning ? 'running' : '') + '" onclick="startTimer(120)">120ש</button>';
-  html += '</div>';
-  html += '<button class="timer-close" onclick="stopTimer()">✕</button>';
-  html += '</div>';
-
-  app.innerHTML = html;
-  // Restore scroll — wait one frame for Safari to finish layout before scrolling
-  if (_scrollY > 0) {
-    requestAnimationFrame(function() {
-      window.scrollTo(0, _scrollY);
-    });
-  }
-}
-
-function buildExpandedContent(ex, key, color) {
-  var isDone = !!state.completed[key];
-  var gq = ex.video || ex.name.replace(/[\u05d0-\u05ea]/g, '').trim() || ex.name;
-  var html = videoHtml(key, gq);
-  html += '<div class="ex-notes">💡 <strong>הערות:</strong> ' + escHtml(ex.notes) + '</div>';
-  html += '<div class="ex-grid">';
-  html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">סטים</div><div class="ex-stat-value" style="color:' + color + '">' + ex.sets + '</div></div>';
-  html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">חזרות</div><div class="ex-stat-value" style="color:' + color + '">' + ex.reps + '</div></div>';
-  html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">מנוחה</div><div class="ex-stat-value" style="color:' + color + '">' + (ex.rest === "-" ? "—" : ex.rest + "ש") + '</div></div>';
-  html += '</div>';
-  html += '<div class="ex-actions">';
-  html += '<button class="done-btn ' + (isDone ? 'checked' : '') + '" onclick="event.stopPropagation();toggleDone(\'' + key + '\')" style="width:100%;border-radius:12px;font-size:15px;">' + (isDone ? '✅ סיימתי' : '○ סמן כהושלם') + '</button>';
-  html += '</div>';
-  return html;
-}
-
-function renderExCard(ex, key, color, showDay) {
-  exMap[key] = {ex: ex, color: color}; // register for in-place updates
-  var isExpanded = state.expandedEx === key;
-  var isDone = !!state.completed[key];
-
-  var html = '<div class="ex-card ' + (isDone ? 'done' : '') + '" id="excard-' + key + '">';
-  html += '<div class="ex-main" onclick="toggleEx(\'' + key + '\')">';
-  html += '<div class="ex-icon" style="background:' + color + '18">' + ex.icon + '</div>';
-  html += '<div class="ex-info">';
-  html += '<div class="ex-name">' + escHtml(ex.name) + '</div>';
-  html += '<div class="ex-meta"><span>' + ex.sets + ' סטים</span><span>× ' + ex.reps + '</span>';
-  if (ex.rest !== "-") html += '<span>🕐 ' + ex.rest + 'ש</span>';
-  html += '</div>';
-  if (showDay) html += '<div class="ex-day-badge" style="color:' + (ex.dayColor || color) + '">יום ' + ex.dayId + ' — ' + ex.sectionName + '</div>';
-  html += '</div>';
-  html += '<div class="ex-arrow ' + (isExpanded ? 'open' : '') + '">▼</div>';
-  html += '</div>';
-
-  if (isExpanded) {
-    html += '<div class="ex-expanded" id="exexp-' + key + '">';
-    html += buildExpandedContent(ex, key, color);
-    html += '</div>';
-  }
-
-  html += '</div>';
-  return html;
-}
-
-function escHtml(s) {
+function eH(s) {
   if (!s) return '';
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-function switchView(v) { state.view = v; state.search = ""; state.expandedEx = null; render(); }
-function switchDay(id) { state.activeDay = id; state.expandedEx = null; render(); var c = document.getElementById("content"); if(c) c.scrollTop = 0; }
-function toggleEx(key) {
-  var prevKey = state.expandedEx;
-  state.expandedEx = (prevKey === key) ? null : key;
+// Build expanded content for a card (used both in initial render and in-place toggle)
+function buildExp(e, key, c) {
+  var isDone = !!S.dn[key];
+  var h = videoHtml(key, e.v);
+  h += '<div class="ec-nt">💡 <b>הערות:</b> ' + eH(e.nt) + '</div>';
+  h += '<div class="ec-g">';
+  h += '<div class="ec-s" style="background:' + c + '10"><div class="ec-sl">סטים</div><div class="ec-sv" style="color:' + c + '">' + e.s + '</div></div>';
+  h += '<div class="ec-s" style="background:' + c + '10"><div class="ec-sl">חזרות</div><div class="ec-sv" style="color:' + c + '">' + e.r + '</div></div>';
+  h += '<div class="ec-s" style="background:' + c + '10"><div class="ec-sl">מנוחה</div><div class="ec-sv" style="color:' + c + '">' + (e.rest === "-" ? "—" : e.rest + "ש") + '</div></div>';
+  h += '</div>';
+  h += '<div class="ec-a"><button class="dn-b' + (isDone ? ' k' : '') + '" onclick="event.stopPropagation();tD(\'' + key + '\')">' + (isDone ? '✅ סיימתי' : '○ סמן כהושלם') + '</button></div>';
+  return h;
+}
 
-  // Close previously open card in-place
-  if (prevKey) {
-    var prevCard = document.getElementById('excard-' + prevKey);
+function rC(e, key, c, sd) {
+  exMap[key] = {e: e, c: c};
+  var isE = S.x === key, isDone = !!S.dn[key];
+  var h = '<div class="ec' + (isDone ? ' done' : '') + '" id="excard-' + key + '">';
+  h += '<div class="ec-m" onclick="tX(\'' + key + '\')">';
+  h += '<div class="ec-i" style="background:' + c + '15">' + e.ic + '</div>';
+  h += '<div class="ec-f"><div class="ec-n">' + eH(e.n) + '</div>';
+  h += '<div class="ec-mt"><span>' + e.s + ' סט</span><span>×' + e.r + '</span>' + (e.rest !== "-" ? '<span>⏱' + e.rest + 'ש</span>' : '') + '</div>';
+  if (sd) h += '<div class="ec-dg" style="color:' + (e.dc||c) + '">יום ' + e.di + ' • ' + eH(e.sn) + '</div>';
+  if (e.mu) h += '<div class="musc">' + eH(e.mu) + '</div>';
+  h += '</div><div class="ec-ar' + (isE ? ' o' : '') + '">▼</div></div>';
+  if (isE) {
+    h += '<div class="ec-x" id="exexp-' + key + '">' + buildExp(e, key, c) + '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+// =====================
+// TOGGLE — in-place DOM, NO page re-render
+// =====================
+function tX(key) {
+  var prev = S.x;
+  S.x = (prev === key) ? null : key;
+
+  // Close previously open card
+  if (prev) {
+    var prevCard = document.getElementById('excard-' + prev);
     if (prevCard) {
-      var prevExp = document.getElementById('exexp-' + prevKey);
+      var prevExp = document.getElementById('exexp-' + prev);
       if (prevExp) prevCard.removeChild(prevExp);
-      var prevArrow = prevCard.querySelector('.ex-arrow');
-      if (prevArrow) prevArrow.classList.remove('open');
+      var prevArr = prevCard.querySelector('.ec-ar');
+      if (prevArr) prevArr.classList.remove('o');
     }
   }
 
-  // Open new card in-place (if toggling to a new one)
-  if (state.expandedEx) {
+  // Open new card
+  if (S.x) {
     var card = document.getElementById('excard-' + key);
-    if (!card) { render(); return; } // fallback
-
-    var arrow = card.querySelector('.ex-arrow');
-    if (arrow) arrow.classList.add('open');
-
+    if (!card) { R(); return; }
+    var arr = card.querySelector('.ec-ar');
+    if (arr) arr.classList.add('o');
     var info = exMap[key];
-    if (!info) { render(); return; } // fallback
-
+    if (!info) { R(); return; }
     var expDiv = document.createElement('div');
-    expDiv.className = 'ex-expanded';
+    expDiv.className = 'ec-x';
     expDiv.id = 'exexp-' + key;
-    expDiv.innerHTML = buildExpandedContent(info.ex, key, info.color);
+    expDiv.innerHTML = buildExp(info.e, key, info.c);
     card.appendChild(expDiv);
-
-    // Scroll the card gently into view (doesn't jump, just reveals if off-screen)
-    setTimeout(function() {
-      card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-    }, 80);
+    setTimeout(function() { card.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 80);
   }
 }
 
-function toggleDone(key) {
-  state.completed[key] = !state.completed[key];
-  saveCompleted();
-  if (navigator.vibrate) navigator.vibrate(30);
-
-  // In-place card update — no re-render
+function tD(key) {
+  S.dn[key] = !S.dn[key];
+  sv();
+  try { navigator.vibrate(30); } catch(e) {}
+  // In-place card update
   var card = document.getElementById('excard-' + key);
   if (card) {
-    if (state.completed[key]) { card.classList.add('done'); } else { card.classList.remove('done'); }
-    var btn = card.querySelector('.done-btn');
+    if (S.dn[key]) { card.classList.add('done'); } else { card.classList.remove('done'); }
+    var btn = card.querySelector('.dn-b');
     if (btn) {
-      btn.textContent = state.completed[key] ? '✅ סיימתי' : '○ סמן כהושלם';
-      if (state.completed[key]) { btn.classList.add('checked'); } else { btn.classList.remove('checked'); }
+      btn.textContent = S.dn[key] ? '✅ סיימתי' : '○ סמן כהושלם';
+      if (S.dn[key]) { btn.classList.add('k'); } else { btn.classList.remove('k'); }
     }
   }
   // Update progress bar
-  var day = DAYS.find(function(d){ return d.id === state.activeDay; });
+  var day = DAYS.find(function(d){ return d.id === S.d; });
   if (day) {
     var total = 0, done = 0;
-    day.sections.forEach(function(sec) {
-      sec.exercises.forEach(function(ex, i) {
-        total++;
-        if (state.completed[day.id + "-" + sec.name + "-" + i]) done++;
-      });
-    });
-    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
-    var fill = document.querySelector('.progress-fill');
+    day.sc.forEach(function(sec) { sec.ex.forEach(function(e,i) { total++; if (S.dn[day.id+"-"+sec.nm+"-"+i]) done++; }); });
+    var pct = total ? Math.round(done/total*100) : 0;
+    var fill = document.querySelector('.prog-fill');
     if (fill) fill.style.width = pct + '%';
-    var counter = document.querySelector('.progress-top span:last-child');
-    if (counter) counter.textContent = done + '/' + total;
+    var ctr = document.querySelector('.prog-top span:last-child');
+    if (ctr) { ctr.textContent = done + '/' + total; ctr.style.color = day.co; }
+    var pd = document.querySelector('.prog-done');
+    if (pct === 100 && !pd) {
+      var pb = document.querySelector('.prog-bar');
+      if (pb) { var d2 = document.createElement('div'); d2.className='prog-done'; d2.textContent='🎉 סיימת! כל הכבוד!'; pb.after(d2); }
+    } else if (pct < 100 && pd) { pd.remove(); }
   }
 }
-function onSearch(val) { state.search = val; state.view = "search"; render(); }
-function showTimer() { state.timerVisible = true; render(); }
 
-window.startTimer = startTimer;
-window.stopTimer = stopTimer;
-window.switchView = switchView;
-window.switchDay = switchDay;
-window.toggleEx = toggleEx;
-window.toggleDone = toggleDone;
-window.onSearch = onSearch;
-window.showTimer = showTimer;
+// =====================
+// MAIN RENDER (only for view/day switches)
+// =====================
+function R() {
+  var _scrollY = window.scrollY || window.pageYOffset || 0;
+  var a = document.getElementById("app");
+  var dy = DAYS.find(function(d){ return d.id === S.d; });
+  var iS = S.v === "search";
+  var sr = [];
+  if (iS && S.q.trim()) {
+    var q = S.q.toLowerCase();
+    allEx.forEach(function(e){
+      if (e.n.toLowerCase().indexOf(q) > -1 || e.nt.toLowerCase().indexOf(q) > -1 ||
+          e.sn.toLowerCase().indexOf(q) > -1 || (e.mu && e.mu.toLowerCase().indexOf(q) > -1)) sr.push(e);
+    });
+  }
+  var t = 0, dn = 0;
+  if (dy) dy.sc.forEach(function(s){ s.ex.forEach(function(e,i){ t++; if(S.dn[dy.id+"-"+s.nm+"-"+i]) dn++; }); });
+  var p = t ? Math.round(dn/t*100) : 0;
 
-render();
+  var grad = dy ? dy.co : '#E94560';
+  var h = '<div class="hd" style="background:linear-gradient(135deg,' + grad + ',' + grad + '33)">';
+  h += '<div class="hd-top"><div><h1>🔥 PPL Training</h1><div class="hd-sub">Push / Pull / Legs + Mobility</div></div>';
+  h += '<div class="vt"><button class="vb' + (iS?'':' a') + '" onclick="sV(\'plan\')">📋</button>';
+  h += '<button class="vb' + (iS?' a':'') + '" onclick="sV(\'search\')">🔍</button></div></div>';
+  if (!iS) {
+    h += '<div class="tabs">';
+    DAYS.forEach(function(d){ h += '<button class="tab' + (d.id===S.d?' a':'') + '" onclick="sD(\'' + d.id + '\')" style="' + (d.id===S.d?'border-color:'+d.co+';color:#fff':'') + '">' + d.ic + ' ' + d.id + '</button>'; });
+    h += '</div>';
+  }
+  h += '</div><div class="cnt" id="cn">';
+
+  if (iS) {
+    h += '<div style="padding:10px 4px 6px"><input class="s-in" type="text" placeholder="🔍 חפש תרגיל, שריר, קבוצת שרירים..." value="' + eH(S.q) + '" oninput="oS(this.value)" autofocus></div>';
+    if (!S.q.trim()) {
+      h += '<div class="s-tags">';
+      ["חזה","גב","כתפיים","רגליים","ליבה","squat","deadlift","press","curl","stretch","שכמה","כף רגל"].forEach(function(tag){ h += '<button class="s-tag" onclick="oS(\'' + tag + '\')">' + tag + '</button>'; });
+      h += '</div><div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.3)"><div style="font-size:40px;margin-bottom:10px">🔍</div><p style="font-size:13px">חפש לפי שם, שריר, או קבוצת שרירים</p></div>';
+    } else {
+      h += '<div style="font-size:11px;color:rgba(255,255,255,.45);padding:4px 2px 6px">' + sr.length + ' תוצאות</div>';
+      sr.forEach(function(e,i){ h += rC(e,"s-"+i,e.dc||"#E94560",true); });
+    }
+  } else {
+    h += '<div class="prog"><div class="prog-top"><span>' + dy.ic + ' ' + dy.t + '</span><span style="color:' + dy.co + ';font-weight:700">' + dn + '/' + t + '</span></div>';
+    h += '<div class="prog-bar"><div class="prog-fill" style="width:' + p + '%;background:' + dy.co + '"></div></div>';
+    if (p === 100) h += '<div class="prog-done">🎉 סיימת! כל הכבוד!</div>';
+    h += '</div>';
+    if (dy.id==="A"||dy.id==="B") h += '<div class="warn">⚠️ <b>שורש כף יד ימין:</b> אחיזה ניטרלית / אגרופים / EZ-Bar. אם כואב — תעצור!</div>';
+    dy.sc.forEach(function(s){
+      h += '<div class="sec-h"><div class="sec-ln" style="background:' + dy.co + '"></div><div class="sec-t">' + s.nm + '</div></div>';
+      s.ex.forEach(function(e,i){ h += rC(e, dy.id+"-"+s.nm+"-"+i, dy.co, false); });
+    });
+  }
+  h += '</div>';
+  if (!TV) h += '<button class="fab" onclick="shT()">⏱</button>';
+  h += '<div class="tmr' + (TV?' v':'') + '"><div class="tmr-d" style="color:' + (TS<=5&&TR?'#E94560':'#fff') + '">' + fT(TS) + '</div>';
+  h += '<div class="tmr-bs"><button class="tmr-p" onclick="stT(60)">60ש</button><button class="tmr-p" onclick="stT(90)">90ש</button><button class="tmr-p" onclick="stT(120)">120ש</button></div>';
+  h += '<button class="tmr-c" onclick="spT()">✕</button></div>';
+  a.innerHTML = h;
+  requestAnimationFrame(function() { if (_scrollY > 0) window.scrollTo(0, _scrollY); });
+}
+
+function sV(v) { S.v=v; S.q=""; S.x=null; R(); }
+function sD(id) { S.d=id; S.x=null; R(); var c=document.getElementById("cn"); if(c) c.scrollTop=0; }
+function oS(v) { S.q=v; S.v="search"; R(); }
+function shT() { TV=true; R(); }
+
+window.sV=sV; window.sD=sD; window.tX=tX; window.tD=tD; window.oS=oS; window.shT=shT;
+window.stT=stT; window.spT=spT; window.playVideo=playVideo;
+
+R();
 </script>
 </body>
 </html>
