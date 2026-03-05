@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>נדב — תוכנית אימון</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --red: #E94560;
+  --blue: #0F3460;
+  --green: #16A085;
+  --purple: #8E44AD;
+  --dark: #0a0a1a;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.08);
+  --text: #e8e8e8;
+  --text2: rgba(255,255,255,0.55);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Heebo', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(135deg, #E94560 0%, #0F3460 100%);
+  padding: calc(12px + var(--safe-top)) 16px 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 4px 30px rgba(233,69,96,0.25);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.header h1 { font-size: 19px; font-weight: 800; color: #fff; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+
+.view-toggle { display: flex; gap: 6px; }
+
+.view-btn {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: none;
+  font-family: 'Heebo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+.view-btn.active { background: #fff; color: var(--red); }
+
+.day-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.day-tabs::-webkit-scrollbar { display: none; }
+
+.day-tab {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-family: 'Heebo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.day-tab.active { border-color: #fff; background: rgba(255,255,255,0.22); }
+
+.search-bar { padding: 12px 16px 8px; flex-shrink: 0; }
+
+.search-input {
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 14px;
+  border: 2px solid rgba(233,69,96,0.2);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-family: 'Heebo', sans-serif;
+  font-size: 15px;
+  outline: none;
+  direction: rtl;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--red); }
+.search-input::placeholder { color: rgba(255,255,255,0.35); }
+
+.search-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px; }
+.search-tag {
+  padding: 5px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.55);
+  font-family: 'Heebo', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 14px calc(80px + var(--safe-bottom));
+}
+
+.progress-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.progress-bar { height: 7px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+.progress-done { text-align: center; margin-top: 8px; font-size: 13px; color: #2ecc71; font-weight: 700; }
+
+.wrist-warning {
+  background: rgba(243,156,18,0.1);
+  border: 1px solid rgba(243,156,18,0.25);
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.section-header { display: flex; align-items: center; gap: 10px; padding: 12px 4px 8px; }
+.section-line { width: 4px; height: 22px; border-radius: 2px; }
+.section-title { font-size: 15px; font-weight: 700; color: #fff; }
+
+.ex-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: all 0.25s;
+  animation: slideIn 0.2s ease;
+}
+.ex-card.done { background: rgba(46,204,113,0.06); border-color: rgba(46,204,113,0.2); }
+
+.ex-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ex-icon {
+  width: 40px; height: 40px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.ex-info { flex: 1; min-width: 0; }
+.ex-name { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 2px; line-height: 1.3; }
+.ex-meta { font-size: 11px; color: var(--text2); display: flex; gap: 8px; flex-wrap: wrap; }
+.ex-day-badge { font-size: 10px; font-weight: 700; margin-top: 3px; }
+.ex-arrow { font-size: 12px; color: rgba(255,255,255,0.2); transition: transform 0.3s; flex-shrink: 0; }
+.ex-arrow.open { transform: rotate(180deg); }
+
+.ex-expanded { padding: 0 14px 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+.ex-notes {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.7);
+}
+
+.ex-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+.ex-stat { border-radius: 10px; padding: 8px; text-align: center; }
+.ex-stat-label { font-size: 10px; color: var(--text2); margin-bottom: 1px; }
+.ex-stat-value { font-size: 17px; font-weight: 800; }
+
+.ex-actions { display: flex; gap: 8px; }
+
+.video-btn {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FF0000, #CC0000);
+  color: #fff;
+  text-decoration: none;
+  font-family: 'Heebo', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(255,0,0,0.2);
+  cursor: pointer;
+  -webkit-user-select: none;
+}
+.video-btn:active { transform: scale(0.97); }
+
+.done-btn {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: rgba(255,255,255,0.3);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.done-btn.checked { border-color: #2ecc71; background: rgba(46,204,113,0.12); color: #2ecc71; }
+
+.timer-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(10,10,26,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 16px calc(12px + var(--safe-bottom));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 200;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.timer-bar.visible { transform: translateY(0); }
+
+.timer-display {
+  font-size: 32px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  min-width: 80px;
+  text-align: center;
+}
+
+.timer-btns { display: flex; gap: 8px; flex: 1; }
+
+.timer-preset {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-family: 'Heebo', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.timer-preset:active, .timer-preset.running { background: var(--red); border-color: var(--red); }
+
+.timer-close {
+  width: 40px; height: 40px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.timer-fab {
+  position: fixed;
+  bottom: calc(20px + var(--safe-bottom));
+  left: 16px;
+  width: 56px; height: 56px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--red), #c0392b);
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(233,69,96,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 150;
+  transition: transform 0.2s;
+}
+.timer-fab:active { transform: scale(0.9); }
+
+.search-empty { text-align: center; padding: 50px 20px; color: rgba(255,255,255,0.35); }
+.search-empty-icon { font-size: 44px; margin-bottom: 12px; }
+.search-empty p { font-size: 14px; }
+.search-count { font-size: 12px; color: var(--text2); padding: 4px 4px 8px; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* GIF styles */
+.gc { margin: 10px 0; border-radius: 12px; overflow: hidden; background: #111; position: relative; cursor: pointer; }
+.gc img { width: 100%; display: block; border-radius: 12px; max-height: 260px; object-fit: cover; }
+.gld { display: flex; align-items: center; justify-content: center; height: 120px; color: rgba(255,255,255,.5); font-size: 13px; gap: 8px; }
+.gsp { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.1); border-top-color: var(--red); border-radius: 50%; animation: gspin .7s linear infinite; }
+@keyframes gspin { to { transform: rotate(360deg); } }
+.gn { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
+.gdot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.15); cursor: pointer; border: none; padding: 0; }
+.gdot.ac { background: var(--red); }
+.glbl { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.65); color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 8px; }
+.nog { text-align: center; padding: 12px; color: rgba(255,255,255,.45); font-size: 12px; border-radius: 10px; margin: 10px 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const DAYS = [
+  {
+    id: "A", title: "יציבות + חוזק תחתון", icon: "🦵", color: "#E94560",
+    sections: [
+      { name: "חימום (10 דקות)", exercises: [
+        { name: "גלילת קצף על כדור טניס", sets: "2", reps: "60 שניות", rest: "-", notes: "לחזק קשת כף הרגל. לגלול לאט על כל אורך כף הרגל", video: "tennis ball foot roll arch flat feet", icon: "🎾" },
+        { name: "Toe Yoga — בוהן גדולה בלבד", sets: "2", reps: "10 לכל רגל", rest: "-", notes: "הרם רק את הבוהן הגדולה בזמן ששאר האצבעות על הרצפה, ואז הפוך", video: "toe yoga exercise big toe raise foot", icon: "🦶" },
+        { name: "עמידה על רגל אחת + מגבת", sets: "2", reps: "30 שניות/צד", rest: "-", notes: "יציבות קרסול + הפעלת כף רגל", video: "single leg balance towel exercise", icon: "🧘" },
+        { name: "Dead Bug", sets: "2", reps: "8 לכל צד", rest: "-", notes: "גב תחתון צמוד לרצפה! הפעלת ליבה עמוקה", video: "dead bug exercise core form", icon: "🪲" },
+      ]},
+      { name: "חלק עיקרי (55 דקות)", exercises: [
+        { name: "Goblet Squat — קטלבל", sets: "4", reps: "10-12", rest: "90", notes: "עקבים בחוץ, ברכיים בכיוון האצבעות. תודעת כף רגל — דרוך על 3 נקודות", video: "kettlebell goblet squat proper form", icon: "🏋️" },
+        { name: "Romanian Deadlift — דמבלסים", sets: "4", reps: "10", rest: "90", notes: "אחיזה ניייטרלית לנוחות שורש כף יד. ירכיים אחורה, גב ישר", video: "dumbbell romanian deadlift RDL form", icon: "💪" },
+        { name: "פיסוק בולגרי — דמבלס", sets: "3", reps: "12 לכל רגל", rest: "60", notes: "רגל אחורית על ספסל. ברך קדמית לא עוברת את האצבעות", video: "bulgarian split squat dumbbell form", icon: "🦿" },
+        { name: "Calf Raise על מדרגה", sets: "3", reps: "15-20", rest: "60", notes: "איטי! עצירה למעלה 2 שניות. ירידה איטית 3 שניות", video: "standing calf raise step slow eccentric", icon: "🔥" },
+        { name: "Pallof Press — כבלים", sets: "3", reps: "10 לכל צד", rest: "60", notes: "עמוד ישר, ידיים דוחפות קדימה. התנגד לסיבוב!", video: "pallof press cable anti rotation core", icon: "🎯" },
+      ]},
+      { name: "סיום (10 דקות)", exercises: [
+        { name: "90/90 Hip Stretch", sets: "2", reps: "60 שניות/צד", rest: "-", notes: "נשימה עמוקה. הרגש את המתיחה בירך", video: "90 90 hip stretch mobility exercise", icon: "🧘‍♂️" },
+        { name: "מתיחת שורש כף יד — קיר", sets: "2", reps: "30 שניות/צד", rest: "-", notes: "עדינות! שני כיוונים — כף כלפי מעלה וכלפי מטה", video: "wrist flexor extensor wall stretch", icon: "✋" },
+      ]},
+    ]
+  },
+  {
+    id: "B", title: "חוזק עליון", icon: "💪", color: "#0F3460",
+    sections: [
+      { name: "חימום (10 דקות)", exercises: [
+        { name: "Band Pull-Apart", sets: "2", reps: "15", rest: "-", notes: "שכמות ממושכות אחורה. הרגש את הגב העליון עובד", video: "band pull apart shoulder warmup form", icon: "🔴" },
+        { name: "סיבובי כתפיים עם מקל", sets: "2", reps: "10 לכל כיוון", rest: "-", notes: "תנועה רחבה ואיטית. אל תכריח טווח תנועה", video: "shoulder pass through stick mobility", icon: "🪄" },
+        { name: "Cat-Cow", sets: "2", reps: "8 מחזורים", rest: "-", notes: "מוביליות עמוד שדרה. תנשום עמוק", video: "cat cow stretch spinal mobility", icon: "🐱" },
+      ]},
+      { name: "חלק עיקרי (55 דקות)", exercises: [
+        { name: "Landmine Press — חד צדדי", sets: "4", reps: "10 לכל יד", rest: "90", notes: "⚠️ יד שמאל רגילה. ימין — אחיזה זהירה, אם כואב תעצור!", video: "single arm landmine press form tutorial", icon: "🚀" },
+        { name: "Cable Row — ישיבה", sets: "4", reps: "12", rest: "90", notes: "אחיזה ניייטרלית. לחץ שכמות אחורה בסוף התנועה", video: "seated cable row neutral grip form", icon: "🚣" },
+        { name: "TRX Row", sets: "3", reps: "12", rest: "60", notes: "גוף ישר כמו קרש. ככל שהרגליים קדימה — יותר קשה", video: "TRX inverted row proper form back", icon: "⛓️" },
+        { name: "Face Pull — כבלים", sets: "3", reps: "15", rest: "60", notes: "קריטי ליציבה! משוך לכיוון הפנים עם רוטציה חיצונית", video: "face pull cable external rotation form", icon: "🎯" },
+        { name: "Farmer's Walk — דמבלסים", sets: "3", reps: "30 מטר", rest: "60", notes: "כתפיים למטה ואחורה. ליבה מהודקת. צעדים קצרים", video: "farmers walk dumbbell form technique", icon: "🚶" },
+      ]},
+      { name: "סיום (10 דקות)", exercises: [
+        { name: "מתיחת חזה — Door Frame", sets: "2", reps: "45 שניות", rest: "-", notes: "ידיים על המשקוף בגובה כתפיים. צעד קדימה", video: "doorway chest stretch pec shoulder", icon: "🚪" },
+        { name: "Thoracic Extension על רולר", sets: "2", reps: "10 חזרות", rest: "-", notes: "רולר על גב עליון. ידיים מאחורי הראש. הינגע אחורה", video: "thoracic extension foam roller mobility", icon: "🔄" },
+      ]},
+    ]
+  },
+  {
+    id: "C", title: "מוביליות וגמישות", icon: "🧘", color: "#16A085",
+    sections: [
+      { name: "כפות רגליים (15 דקות)", exercises: [
+        { name: "גלילת כדור טניס יחף", sets: "3", reps: "60 שניות/צד", rest: "-", notes: "לחץ קל-בינוני. מקשת כף הרגל עד האצבעות", video: "tennis ball foot massage flat feet arch", icon: "🎾" },
+        { name: "Towel Scrunches — אצבעות", sets: "3", reps: "15", rest: "-", notes: "משוך מגבת לכיוונך רק עם אצבעות הרגליים", video: "towel scrunch exercise foot strengthen", icon: "🧣" },
+        { name: "עמידה על רגל אחת — עיניים עצומות", sets: "3", reps: "30 שניות/צד", rest: "-", notes: "אתגר יציבות אמיתי! אם נופל — פתח עיניים והמשך", video: "single leg balance eyes closed exercise", icon: "👁️" },
+      ]},
+      { name: "ירכיים וליבה (15 דקות)", exercises: [
+        { name: "90/90 Hip Flow", sets: "3", reps: "8 לכל צד", rest: "-", notes: "עבור בין צדדים בצורה זורמת. נשימה עמוקה", video: "90 90 hip flow mobility transitions", icon: "🔄" },
+        { name: "Deep Squat Hold + Thoracic Rotation", sets: "3", reps: "5 לכל צד", rest: "-", notes: "שב בסקוואט עמוק וסובב גוף עליון לצדדים", video: "deep squat thoracic rotation mobility", icon: "🏋️" },
+        { name: "Shoulder CARs", sets: "2", reps: "5 לכל כיוון", rest: "-", notes: "סיבוב מלא של הכתף. איטי ומבוקר!", video: "shoulder CARs controlled articular rotations", icon: "🔵" },
+        { name: "Wrist CARs + מתיחות", sets: "2", reps: "10 לכל כיוון", rest: "-", notes: "שיקום שורש כף יד. עדין!", video: "wrist CARs controlled articular rotations", icon: "✋" },
+      ]},
+      { name: "כתפיים ועמוד שדרה (15 דקות)", exercises: [
+        { name: "Open Books", sets: "3", reps: "8 לכל צד", rest: "-", notes: "שכב על הצד, סובב גוף עליון כמו ספר שנפתח", video: "open book stretch thoracic rotation", icon: "📖" },
+        { name: "Wall Slides", sets: "3", reps: "10", rest: "-", notes: "גב וידיים צמודים לקיר. החלק למעלה ולמטה", video: "wall slide exercise shoulder scapula", icon: "🧱" },
+        { name: "פלאנק צדדי", sets: "3", reps: "30 שניות/צד", rest: "-", notes: "גוף בקו ישר. ליבה מהודקת!", video: "side plank proper form core stability", icon: "📐" },
+        { name: "Bird Dog", sets: "3", reps: "8 לכל צד", rest: "-", notes: "יד ורגל נגדיים. שמור על גב ישר ויציב", video: "bird dog exercise core stability form", icon: "🐕" },
+      ]},
+      { name: "גמישות סטטית (15 דקות)", exercises: [
+        { name: "מתיחת ירכיים אחורית", sets: "3", reps: "45 שניות/צד", rest: "-", notes: "רגל ישרה על משטח גבוה או שכיבה. נשימה!", video: "hamstring stretch flexibility exercise", icon: "🦵" },
+        { name: "מתיחת כופף ירך (Hip Flexor)", sets: "3", reps: "45 שניות/צד", rest: "-", notes: "ברך על הרצפה. דחוף ירך קדימה. קריטי לעומדים הרבה!", video: "hip flexor stretch kneeling lunge", icon: "🏃" },
+        { name: "מתיחת חזה (Pec Stretch)", sets: "3", reps: "45 שניות/צד", rest: "-", notes: "פתיחת חזה נגד עמידה שפופה", video: "pec stretch doorway chest opener", icon: "🚪" },
+        { name: "מתיחת שורש כף יד + אצבעות", sets: "2", reps: "30 שניות/צד", rest: "-", notes: "עדינות! כיוון אחד ואז הפוך", video: "wrist flexor extensor stretch forearm", icon: "🖐️" },
+      ]},
+    ]
+  },
+  {
+    id: "D", title: "חוזק פונקציונלי מלא", icon: "⚡", color: "#8E44AD",
+    sections: [
+      { name: "חימום (10 דקות)", exercises: [
+        { name: "World's Greatest Stretch", sets: "2", reps: "5 לכל צד", rest: "-", notes: "צעד קדימה, יד לרצפה, סיבוב גוף עליון למעלה", video: "worlds greatest stretch full body mobility", icon: "🌍" },
+        { name: "Toe Yoga + הפעלת קשת", sets: "2", reps: "10/רגל", rest: "-", notes: "Short Foot — קצר את כף הרגל בלי לכופף אצבעות", video: "toe yoga short foot arch activation", icon: "🦶" },
+        { name: "הליכת דוב", sets: "2", reps: "20 מטר", rest: "-", notes: "על קצות האצבעות. הפעלת כל הגוף!", video: "bear crawl exercise warmup full body", icon: "🐻" },
+      ]},
+      { name: "חלק עיקרי (55 דקות)", exercises: [
+        { name: "Landmine Squat to Press", sets: "4", reps: "8 לכל יד", rest: "90", notes: "⚠️ תנועה מורכבת! סקוואט + לחיצה למעלה בתנועה אחת זורמת", video: "landmine squat to press single arm", icon: "🔥" },
+        { name: "KB Swing — קטלבל", sets: "4", reps: "15", rest: "60", notes: "כוח מהירכיים! לא מהידיים. קטלבל עולה מכוח הפיצוץ של הירכיים", video: "kettlebell swing proper form hip hinge", icon: "🔔" },
+        { name: "TRX Single Leg Squat", sets: "3", reps: "8 לכל רגל", rest: "60", notes: "אחוז ב-TRX לאיזון. שב על רגל אחת לעומק", video: "TRX assisted pistol squat single leg", icon: "🎯" },
+        { name: "Landmine Row — חד צדדי", sets: "3", reps: "10 לכל יד", rest: "60", notes: "⚠️ אחיזה ניייטרלית. נוחה יותר לשורש כף יד", video: "single arm landmine row form technique", icon: "💪" },
+        { name: "Turkish Get-Up — קטלבל קל", sets: "3", reps: "3 לכל צד", rest: "90", notes: "👑 תרגיל המלך! לאט לאט, שלב אחרי שלב. התחל קל!", video: "turkish get up kettlebell step by step", icon: "👑" },
+        { name: "Dead Hang — תלייה על מוט", sets: "3", reps: "מקסימום", rest: "60", notes: "פשוט תלה! דקומפרסיה לכתפיים + חיזוק אחיזה", video: "dead hang bar shoulder decompression grip", icon: "🦍" },
+      ]},
+      { name: "סיום (10 דקות)", exercises: [
+        { name: "מתיחת יונה (Pigeon)", sets: "2", reps: "60 שניות/צד", rest: "-", notes: "רגל קדמית מכופפת, רגל אחורית ישרה. נשום!", video: "pigeon stretch hip opener flexibility", icon: "🕊️" },
+        { name: "נשימה עמוקה — סיום", sets: "2", reps: "90 שניות", rest: "-", notes: "שכב על הגב. 4 שניות שאיפה, 4 שניות נשיפה. הרגע!", video: "diaphragmatic breathing cool down relax", icon: "🧘‍♂️" },
+      ]},
+    ]
+  }
+];
+
+// Flatten for search
+const allExercises = [];
+DAYS.forEach(day => {
+  day.sections.forEach(sec => {
+    sec.exercises.forEach(ex => {
+      allExercises.push({ ...ex, dayId: day.id, dayTitle: day.title, dayColor: day.color, sectionName: sec.name });
+    });
+  });
+});
+
+// STATE
+let state = {
+  activeDay: "A",
+  view: "plan",
+  search: "",
+  expandedEx: null,
+  completed: JSON.parse(localStorage.getItem("nc_completed") || "{}"),
+  timerVisible: false,
+  timerSeconds: 0,
+  timerRunning: false,
+  timerInterval: null,
+};
+
+function saveCompleted() {
+  try { localStorage.setItem("nc_completed", JSON.stringify(state.completed)); } catch(e) {}
+}
+
+function getYouTubeUrl(query) {
+  return "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
+}
+
+// GIF SYSTEM
+var gifData = {};
+var gifLoad = {};
+var gifI = {};
+
+function fetchGif(key, q) {
+  if (gifData[key] || gifLoad[key]) return;
+  gifLoad[key] = true;
+  var url = "https://g.tenor.com/v1/search?q=" + encodeURIComponent(q + " exercise form") + "&key=LIVDSRZULELA&limit=3&media_filter=minimal";
+  fetch(url).then(function(r){ return r.json(); }).then(function(d){
+    if (d.results && d.results.length) {
+      gifData[key] = d.results.map(function(r){ return r.media[0].gif.url; });
+    } else { gifData[key] = []; }
+    gifLoad[key] = false;
+    render();
+  }).catch(function(){ gifData[key] = []; gifLoad[key] = false; render(); });
+}
+
+function nextGif(k) {
+  if (!gifData[k] || gifData[k].length < 2) return;
+  gifI[k] = ((gifI[k] || 0) + 1) % gifData[k].length;
+  render();
+}
+
+function pickGif(k, i) { gifI[k] = i; render(); }
+
+function gifHtml(key, q, col) {
+  if (!gifData[key] && !gifLoad[key]) setTimeout(function(){ fetchGif(key, q); }, 20);
+  if (gifLoad[key]) return '<div class="gc"><div class="gld"><div class="gsp"></div> טוען הדגמה...</div></div>';
+  if (gifData[key] && gifData[key].length) {
+    var i = gifI[key] || 0, u = gifData[key][i], dots = '';
+    if (gifData[key].length > 1) {
+      dots = '<div class="gn">';
+      for (var j = 0; j < gifData[key].length; j++) {
+        dots += '<button class="gdot' + (j === i ? ' ac' : '') + '"' + (j === i ? ' style="background:' + col + '"' : '') + ' onclick="event.stopPropagation();pickGif(\'' + key + '\',' + j + ')"></button>';
+      }
+      dots += '</div>';
+    }
+    return '<div class="gc" onclick="event.stopPropagation();nextGif(\'' + key + '\')"><img src="' + u + '" alt="הדגמה" loading="lazy" onerror="this.parentElement.outerHTML=\'<div class=nog>לחץ על סרטון YouTube למטה</div>\'"><div class="glbl">👇 לחץ לעוד</div></div>' + dots;
+  }
+  if (gifData[key] && !gifData[key].length) return '<div class="nog">🎬 לחץ על סרטון YouTube למטה</div>';
+  return '';
+}
+
+window.nextGif = nextGif;
+window.pickGif = pickGif;
+
+// TIMER
+function startTimer(seconds) {
+  clearInterval(state.timerInterval);
+  state.timerSeconds = seconds;
+  state.timerRunning = true;
+  state.timerVisible = true;
+  state.timerInterval = setInterval(function() {
+    state.timerSeconds--;
+    if (state.timerSeconds <= 0) {
+      clearInterval(state.timerInterval);
+      state.timerRunning = false;
+      state.timerSeconds = 0;
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+    }
+    render();
+  }, 1000);
+  render();
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+  state.timerRunning = false;
+  state.timerVisible = false;
+  render();
+}
+
+function formatTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ":" + (sec < 10 ? "0" : "") + sec;
+}
+
+// RENDER
+function render() {
+  var app = document.getElementById("app");
+  var day = DAYS.find(function(d){ return d.id === state.activeDay; });
+  var isSearch = state.view === "search";
+
+  var searchResults = [];
+  if (isSearch && state.search.trim()) {
+    var q = state.search.toLowerCase();
+    allExercises.forEach(function(ex) {
+      if (ex.name.toLowerCase().includes(q) || ex.notes.toLowerCase().includes(q) || ex.sectionName.toLowerCase().includes(q)) {
+        searchResults.push(ex);
+      }
+    });
+  }
+
+  var total = 0, done = 0;
+  if (day) {
+    day.sections.forEach(function(sec) {
+      sec.exercises.forEach(function(ex, i) {
+        total++;
+        if (state.completed[day.id + "-" + sec.name + "-" + i]) done++;
+      });
+    });
+  }
+  var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  var html = "";
+
+  // Header
+  html += '<div class="header"><div class="header-top"><div><h1>💪 תוכנית אימון</h1><div class="header-sub">בנייה מהיסודות | יציבות → חוזק → מוביליות</div></div>';
+  html += '<div class="view-toggle">';
+  html += '<button class="view-btn ' + (!isSearch ? 'active' : '') + '" onclick="switchView(\'plan\')">📋</button>';
+  html += '<button class="view-btn ' + (isSearch ? 'active' : '') + '" onclick="switchView(\'search\')">🔍</button>';
+  html += '</div></div>';
+
+  if (!isSearch) {
+    html += '<div class="day-tabs">';
+    DAYS.forEach(function(d) {
+      html += '<button class="day-tab ' + (d.id === state.activeDay ? 'active' : '') + '" onclick="switchDay(\'' + d.id + '\')">' + d.icon + ' יום ' + d.id + '</button>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Content
+  html += '<div class="content" id="content">';
+
+  if (isSearch) {
+    html += '<div class="search-bar"><input class="search-input" type="text" placeholder="🔍 חפש תרגיל..." value="' + escHtml(state.search) + '" oninput="onSearch(this.value)" autofocus></div>';
+    if (!state.search.trim()) {
+      html += '<div class="search-tags">';
+      ["squat", "ליבה", "כתפיים", "stretch", "TRX", "Landmine", "קטלבל", "רגל", "ירך"].forEach(function(tag) {
+        html += '<button class="search-tag" onclick="onSearch(\'' + tag + '\')">' + tag + '</button>';
+      });
+      html += '</div>';
+      html += '<div class="search-empty"><div class="search-empty-icon">🔍</div><p>חפש תרגיל לפי שם או קבוצת שרירים</p></div>';
+    } else {
+      html += '<div class="search-count">' + searchResults.length + ' תוצאות</div>';
+      searchResults.forEach(function(ex, i) {
+        html += renderExCard(ex, "search-" + i, ex.dayColor, true);
+      });
+    }
+  } else {
+    // Progress
+    html += '<div class="progress-card">';
+    html += '<div class="progress-top"><span>' + day.icon + ' יום ' + day.id + ' — ' + day.title + '</span>';
+    html += '<span style="color:' + day.color + ';font-weight:700">' + done + '/' + total + '</span></div>';
+    html += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:' + day.color + '"></div></div>';
+    if (pct === 100) html += '<div class="progress-done">🎉 סיימת! כל הכבוד!</div>';
+    html += '</div>';
+
+    if (day.id === "B" || day.id === "D") {
+      html += '<div class="wrist-warning">⚠️ <strong>שורש כף יד ימין:</strong> בתרגילים שדורשים אחיזת כף יד פתוחה — השתמש באגרופים, Push-Up Handles, או אחיזת EZ-Bar. אם כואב — תעצור!</div>';
+    }
+
+    day.sections.forEach(function(sec) {
+      html += '<div class="section-header"><div class="section-line" style="background:' + day.color + '"></div><div class="section-title">' + sec.name + '</div></div>';
+      sec.exercises.forEach(function(ex, ei) {
+        var key = day.id + "-" + sec.name + "-" + ei;
+        html += renderExCard(ex, key, day.color, false);
+      });
+    });
+  }
+
+  html += '</div>'; // content
+
+  if (!state.timerVisible) {
+    html += '<button class="timer-fab" onclick="showTimer()">⏱</button>';
+  }
+
+  html += '<div class="timer-bar ' + (state.timerVisible ? 'visible' : '') + '">';
+  html += '<div class="timer-display" style="color:' + (state.timerSeconds <= 5 && state.timerRunning ? '#E94560' : '#fff') + '">' + formatTime(state.timerSeconds) + '</div>';
+  html += '<div class="timer-btns">';
+  html += '<button class="timer-preset ' + (state.timerRunning ? 'running' : '') + '" onclick="startTimer(60)">60ש</button>';
+  html += '<button class="timer-preset ' + (state.timerRunning ? 'running' : '') + '" onclick="startTimer(90)">90ש</button>';
+  html += '<button class="timer-preset ' + (state.timerRunning ? 'running' : '') + '" onclick="startTimer(120)">120ש</button>';
+  html += '</div>';
+  html += '<button class="timer-close" onclick="stopTimer()">✕</button>';
+  html += '</div>';
+
+  app.innerHTML = html;
+}
+
+function renderExCard(ex, key, color, showDay) {
+  var isExpanded = state.expandedEx === key;
+  var isDone = !!state.completed[key];
+
+  var html = '<div class="ex-card ' + (isDone ? 'done' : '') + '">';
+  html += '<div class="ex-main" onclick="toggleEx(\'' + key + '\')">';
+  html += '<div class="ex-icon" style="background:' + color + '18">' + ex.icon + '</div>';
+  html += '<div class="ex-info">';
+  html += '<div class="ex-name">' + escHtml(ex.name) + '</div>';
+  html += '<div class="ex-meta"><span>' + ex.sets + ' סטים</span><span>× ' + ex.reps + '</span>';
+  if (ex.rest !== "-") html += '<span>🕐 ' + ex.rest + 'ש</span>';
+  html += '</div>';
+  if (showDay) html += '<div class="ex-day-badge" style="color:' + (ex.dayColor || color) + '">יום ' + ex.dayId + ' — ' + ex.sectionName + '</div>';
+  html += '</div>';
+  html += '<div class="ex-arrow ' + (isExpanded ? 'open' : '') + '">▼</div>';
+  html += '</div>';
+
+  if (isExpanded) {
+    var gq = ex.video || ex.name.replace(/[\u05d0-\u05ea\u2014—]/g, '').trim();
+    html += '<div class="ex-expanded">';
+    html += gifHtml(key, gq, color);
+    html += '<div class="ex-notes">💡 <strong>הערות:</strong> ' + escHtml(ex.notes) + '</div>';
+    html += '<div class="ex-grid">';
+    html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">סטים</div><div class="ex-stat-value" style="color:' + color + '">' + ex.sets + '</div></div>';
+    html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">חזרות</div><div class="ex-stat-value" style="color:' + color + '">' + ex.reps + '</div></div>';
+    html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">מנוחה</div><div class="ex-stat-value" style="color:' + color + '">' + (ex.rest === "-" ? "—" : ex.rest + "ש") + '</div></div>';
+    html += '</div>';
+    html += '<div class="ex-actions">';
+    html += '<a class="video-btn" href="' + getYouTubeUrl(ex.video) + '" target="_blank" rel="noopener">▶️ YouTube</a>';
+    html += '<button class="done-btn ' + (isDone ? 'checked' : '') + '" onclick="event.stopPropagation();toggleDone(\'' + key + '\')">' + (isDone ? '✓' : '○') + '</button>';
+    html += '</div>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function switchView(v) { state.view = v; state.search = ""; state.expandedEx = null; render(); }
+function switchDay(id) { state.activeDay = id; state.expandedEx = null; render(); var c = document.getElementById("content"); if(c) c.scrollTop = 0; }
+function toggleEx(key) { state.expandedEx = state.expandedEx === key ? null : key; render(); }
+function toggleDone(key) { state.completed[key] = !state.completed[key]; saveCompleted(); if (navigator.vibrate) navigator.vibrate(30); render(); }
+function onSearch(val) { state.search = val; state.view = "search"; render(); }
+function showTimer() { state.timerVisible = true; render(); }
+
+window.startTimer = startTimer;
+window.stopTimer = stopTimer;
+window.switchView = switchView;
+window.switchDay = switchDay;
+window.toggleEx = toggleEx;
+window.toggleDone = toggleDone;
+window.onSearch = onSearch;
+window.showTimer = showTimer;
+
+render();
+</script>
+</body>
+</html>
