@@ -492,10 +492,23 @@ var gifI = {};
 function fetchGif(key, q) {
   if (gifData[key] || gifLoad[key]) return;
   gifLoad[key] = true;
-  var url = "https://g.tenor.com/v1/search?q=" + encodeURIComponent(q + " exercise form") + "&key=LIVDSRZULELA&limit=3&media_filter=minimal";
+  // Search specifically for workout/gym content with strict fitness terms
+  var query = q + " workout gym exercise tutorial";
+  var url = "https://g.tenor.com/v1/search?q=" + encodeURIComponent(query) +
+    "&key=LIVDSRZULELA&limit=8&media_filter=minimal&contentfilter=medium&ar_range=wide";
   fetch(url).then(function(r){ return r.json(); }).then(function(d){
     if (d.results && d.results.length) {
-      gifData[key] = d.results.map(function(r){ return r.media[0].gif.url; });
+      // Filter: only keep GIFs where the title/tags suggest fitness content
+      var fitnessKeywords = ["workout","exercise","gym","fitness","training","lift","squat","deadlift","press","curl","row","stretch","plank","form","technique","muscle","strength","mobility","yoga","pilates","dumbbell","barbell","kettlebell","cable","rep","set"];
+      var filtered = d.results.filter(function(r){
+        var title = (r.title || "").toLowerCase();
+        var tags = (r.tags || []).join(" ").toLowerCase();
+        var combined = title + " " + tags;
+        return fitnessKeywords.some(function(kw){ return combined.includes(kw); });
+      });
+      // Fall back to all results if filter is too strict
+      var results = filtered.length > 0 ? filtered : d.results;
+      gifData[key] = results.slice(0,3).map(function(r){ return r.media[0].gif.url; });
     } else { gifData[key] = []; }
     gifLoad[key] = false;
     render();
@@ -685,6 +698,7 @@ function renderExCard(ex, key, color, showDay) {
   html += '</div>';
 
   if (isExpanded) {
+    // Use the curated English video search term directly — always fitness-relevant
     var gq = ex.video || ex.name.replace(/[\u05d0-\u05ea\u2014—]/g, '').trim();
     html += '<div class="ex-expanded">';
     html += gifHtml(key, gq, color);
