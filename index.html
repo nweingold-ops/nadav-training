@@ -625,6 +625,7 @@ function formatTime(s) {
 
 // RENDER
 function render() {
+  var _scrollY = window.scrollY || window.pageYOffset || 0;
   var app = document.getElementById("app");
   var day = DAYS.find(function(d){ return d.id === state.activeDay; });
   var isSearch = state.view === "search";
@@ -725,6 +726,8 @@ function render() {
   html += '</div>';
 
   app.innerHTML = html;
+  // Restore scroll position — prevents jump-to-top on re-render
+  if (_scrollY > 0) { window.scrollTo(0, _scrollY); }
 }
 
 function renderExCard(ex, key, color, showDay) {
