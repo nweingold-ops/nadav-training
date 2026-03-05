@@ -345,8 +345,9 @@ html, body {
 .vid-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 .vid-thumb { width: 100%; height: 100%; position: relative; cursor: pointer; }
 .vid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.vid-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 56px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.vid-play::after { content: ''; border-left: 22px solid #fff; border-top: 13px solid transparent; border-bottom: 13px solid transparent; margin-right: -4px; }
+.vid-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 64px; height: 64px; background: rgba(255,0,0,0.92); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.vid-play::after { content: ''; border-left: 26px solid #fff; border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-right: -4px; }
+.vid-hint { text-align: center; font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; letter-spacing: 0.05em; }
 .vid-loading { display: flex; align-items: center; justify-content: center; height: 160px; color: rgba(255,255,255,.5); font-size: 13px; gap: 8px; }
 .vid-spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.1); border-top-color: var(--red); border-radius: 50%; animation: vspin .7s linear infinite; }
 @keyframes vspin { to { transform: rotate(360deg); } }
@@ -575,7 +576,8 @@ function videoHtml(key, query) {
     key + '\')">' +
     '<img src="' + thumb + '" alt="תצוגה מקדימה">' +
     '<div class="vid-play"></div>' +
-    '</div></div>';
+    '</div></div>' +
+    '<div class="vid-hint">לחץ ▶️ לצפייה בתוך האפליקציה</div>';
 }
 
 window.playVideo = playVideo;
@@ -744,8 +746,7 @@ function renderExCard(ex, key, color, showDay) {
     html += '<div class="ex-stat" style="background:' + color + '12"><div class="ex-stat-label">מנוחה</div><div class="ex-stat-value" style="color:' + color + '">' + (ex.rest === "-" ? "—" : ex.rest + "ש") + '</div></div>';
     html += '</div>';
     html += '<div class="ex-actions">';
-    html += '<a class="video-btn" href="' + getYouTubeUrl(ex.video) + '" target="_blank" rel="noopener">▶️ YouTube</a>';
-    html += '<button class="done-btn ' + (isDone ? 'checked' : '') + '" onclick="event.stopPropagation();toggleDone(\'' + key + '\')">' + (isDone ? '✓' : '○') + '</button>';
+    html += '<button class="done-btn ' + (isDone ? 'checked' : '') + '" onclick="event.stopPropagation();toggleDone(\'' + key + '\')" style="width:100%;border-radius:12px;font-size:15px;">' + (isDone ? '✅ סיימתי' : '○ סמן כהושלם') + '</button>';
     html += '</div>';
     html += '</div>';
   }
