@@ -552,7 +552,16 @@ var VIDEO_MAP = {
 
 var vidPlay = {};
 
-function playVideo(key) { vidPlay[key] = true; render(); }
+function playVideo(key, vid) {
+  vidPlay[key] = true;
+  // In-place DOM swap — no full re-render, page stays in position
+  var wrap = document.getElementById('vid-' + key);
+  if (wrap && vid) {
+    wrap.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + vid +
+      '?autoplay=1&rel=0&modestbranding=1&playsinline=1" allowfullscreen ' +
+      'allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>';
+  }
+}
 
 function videoHtml(key, query) {
   var vid = VIDEO_MAP[query] || null;
@@ -565,15 +574,15 @@ function videoHtml(key, query) {
   }
 
   if (vidPlay[key]) {
-    return '<div class="vid-wrap"><iframe src="https://www.youtube-nocookie.com/embed/' +
+    return '<div class="vid-wrap" id="vid-' + key + '"><iframe src="https://www.youtube-nocookie.com/embed/' +
       vid + '?autoplay=1&rel=0&modestbranding=1&playsinline=1" ' +
       'allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe></div>';
   }
 
-  // Thumbnail + play button
+  // Thumbnail + play button — passes vid ID directly so playVideo can swap in-place
   var thumb = "https://img.youtube.com/vi/" + vid + "/mqdefault.jpg";
-  return '<div class="vid-wrap"><div class="vid-thumb" onclick="event.stopPropagation();playVideo(\'' +
-    key + '\')">' +
+  return '<div class="vid-wrap" id="vid-' + key + '"><div class="vid-thumb" onclick="event.stopPropagation();playVideo(\'' +
+    key + '\',\'' + vid + '\')">' +
     '<img src="' + thumb + '" alt="תצוגה מקדימה">' +
     '<div class="vid-play"></div>' +
     '</div></div>' +
