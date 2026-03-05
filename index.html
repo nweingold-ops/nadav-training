@@ -484,72 +484,98 @@ function getYouTubeUrl(query) {
   return "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
 }
 
-// VIDEO SYSTEM - uses Invidious API to find YouTube video IDs, embeds inline
-var vidData = {};   // key -> videoId or null
-var vidLoad = {};   // key -> true/false
-var vidPlay = {};   // key -> true (user clicked play)
+// VIDEO SYSTEM - hardcoded YouTube video IDs per exercise
+// Key = exercise video search string
+var VIDEO_MAP = {
+  // Day A warmup
+  "tennis ball foot roll arch flat feet":       "0-U42FBCnYg",
+  "toe yoga exercise big toe raise foot":        "H4wbEJKkqKs",
+  "single leg balance towel exercise":           "wMECRhEnEgo",
+  "dead bug exercise core form":                 "XcYtWYMz39w",
+  // Day A main
+  "kettlebell goblet squat proper form":         "BR4tlEE_A98",
+  "dumbbell romanian deadlift RDL form":         "IJdUtnxAmNo",
+  "bulgarian split squat dumbbell form":         "hiLF_pF3EJM",
+  "standing calf raise step slow eccentric":     "JbyjNymZOt0",
+  "pallof press cable anti rotation core":       "xeFp4MXad98",
+  // Day A cooldown
+  "90 90 hip stretch mobility exercise":         "t4Zz6-aG8Iw",
+  "wrist flexor extensor wall stretch":          "b4HzqFfthxA",
+  // Day B warmup
+  "band pull apart shoulder warmup form":        "smSSXITNpCI",
+  "shoulder pass through stick mobility":        "OuHnRuOD8Kc",
+  "cat cow stretch spinal mobility":             "xyNwxiuERXc",
+  // Day B main
+  "single arm landmine press form tutorial":     "NN4r-mEFO7M",
+  "seated cable row neutral grip form":          "GZbfZ033f74",
+  "TRX inverted row proper form back":           "iT_oaf3k0Xw",
+  "face pull cable external rotation form":      "aeEAYMPBuAI",
+  "farmers walk dumbbell form technique":        "rt0RDnQ1Oqo",
+  // Day B cooldown
+  "doorway chest stretch pec shoulder":          "W_h2qkNqvZs",
+  "thoracic extension foam roller mobility":     "q5MfqMSRQiY",
+  // Day C - feet
+  "tennis ball foot massage flat feet arch":     "0-U42FBCnYg",
+  "towel scrunch exercise foot strengthen":      "V1rJ8U0JJCE",
+  "single leg balance eyes closed exercise":     "wMECRhEnEgo",
+  // Day C - hips & core
+  "90 90 hip flow mobility transitions":         "4o6aSH3uDFU",
+  "deep squat thoracic rotation mobility":       "aPfRE0aPzv4",
+  "shoulder CARs controlled articular rotations":"f8LrSvDsLzM",
+  "wrist CARs controlled articular rotations":   "kfRLzq8rRdo",
+  // Day C - shoulders & spine
+  "open book stretch thoracic rotation":         "3vIXv_HWDGE",
+  "wall slide exercise shoulder scapula":        "P8pN1CgWNAo",
+  "side plank proper form core stability":       "XeN4pEZZJNI",
+  "bird dog exercise core stability form":       "wcpHuv5DMWg",
+  // Day C - static flexibility
+  "hamstring stretch flexibility exercise":      "puh_EIGG5aE",
+  "hip flexor stretch kneeling lunge":           "iZ1eZBY4fwM",
+  "pec stretch doorway chest opener":            "W_h2qkNqvZs",
+  "wrist flexor extensor stretch forearm":       "b4HzqFfthxA",
+  // Day D warmup
+  "worlds greatest stretch full body mobility":  "T6j7BpxeqqU",
+  "toe yoga short foot arch activation":         "H4wbEJKkqKs",
+  "bear crawl exercise warmup full body":        "E8-MiDlJOHI",
+  // Day D main
+  "landmine squat to press single arm":          "36bYbz5TlB4",
+  "kettlebell swing proper form hip hinge":      "h-A7HiTNZ5c",
+  "TRX assisted pistol squat single leg":        "RoRvaTsz6bw",
+  "single arm landmine row form technique":      "w1n0SL2Wv84",
+  "turkish get up kettlebell step by step":      "lpltjWHd0ek",
+  "dead hang bar shoulder decompression grip":   "YtK6w7gBEdA",
+  // Day D cooldown
+  "pigeon stretch hip opener flexibility":       "aj1gSKUQPWg",
+  "diaphragmatic breathing cool down relax":     "kgTL_MFmEzg"
+};
 
-// Invidious public instances (fallbacks)
-var INV_INSTANCES = [
-  "https://inv.tux.pizza",
-  "https://invidious.privacydev.net",
-  "https://yt.cdaut.de"
-];
+var vidPlay = {};
 
-function fetchVideo(key, query) {
-  if (vidData.hasOwnProperty(key) || vidLoad[key]) return;
-  vidLoad[key] = true;
-  var q = encodeURIComponent(query + " exercise tutorial form");
-  var tried = 0;
-
-  function tryNext() {
-    if (tried >= INV_INSTANCES.length) {
-      vidData[key] = null; vidLoad[key] = false; render(); return;
-    }
-    var url = INV_INSTANCES[tried] + "/api/v1/search?q=" + q + "&fields=videoId,title&type=video&sort_by=relevance";
-    tried++;
-    fetch(url, {signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined})
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if (Array.isArray(d) && d.length > 0 && d[0].videoId) {
-          vidData[key] = d[0].videoId;
-        } else {
-          tryNext(); return;
-        }
-        vidLoad[key] = false; render();
-      })
-      .catch(function(){ tryNext(); });
-  }
-  setTimeout(tryNext, 20);
-}
-
-function playVideo(key) {
-  vidPlay[key] = true;
-  render();
-}
+function playVideo(key) { vidPlay[key] = true; render(); }
 
 function videoHtml(key, query) {
-  if (!vidData.hasOwnProperty(key) && !vidLoad[key]) fetchVideo(key, query);
+  var vid = VIDEO_MAP[query] || null;
 
-  if (vidPlay[key] && vidData[key]) {
-    // Embedded player
-    return '<div class="vid-wrap"><iframe src="https://www.youtube-nocookie.com/embed/' + vidData[key] + '?autoplay=1&rel=0&modestbranding=1" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>';
+  if (!vid) {
+    // No hardcoded ID — show YouTube search link as fallback
+    return '<div class="vid-err">🎬 <a href="https://www.youtube.com/results?search_query=' +
+      encodeURIComponent(query + " exercise tutorial") +
+      '" target="_blank" style="color:#E94560">חפש הדגמה ב-YouTube</a></div>';
   }
 
-  if (vidLoad[key]) {
-    return '<div class="vid-wrap"><div class="vid-loading"><div class="vid-spinner"></div> מחפש הדגמה...</div></div>';
+  if (vidPlay[key]) {
+    return '<div class="vid-wrap"><iframe src="https://www.youtube-nocookie.com/embed/' +
+      vid + '?autoplay=1&rel=0&modestbranding=1&playsinline=1" ' +
+      'allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe></div>';
   }
 
-  if (vidData[key]) {
-    // Thumbnail with play button
-    var thumb = "https://img.youtube.com/vi/" + vidData[key] + "/mqdefault.jpg";
-    return '<div class="vid-wrap"><div class="vid-thumb" onclick="event.stopPropagation();playVideo(\'' + key + '\')">' +
-      '<img src="' + thumb + '" onerror="this.src=\'https://img.youtube.com/vi/' + vidData[key] + '/default.jpg\'">' +
-      '<div class="vid-play"></div>' +
-      '</div></div>';
-  }
-
-  return '<div class="vid-err">🎬 לחץ על "YouTube" למטה לצפייה</div>';
+  // Thumbnail + play button
+  var thumb = "https://img.youtube.com/vi/" + vid + "/mqdefault.jpg";
+  return '<div class="vid-wrap"><div class="vid-thumb" onclick="event.stopPropagation();playVideo(\'' +
+    key + '\')">' +
+    '<img src="' + thumb + '" alt="תצוגה מקדימה">' +
+    '<div class="vid-play"></div>' +
+    '</div></div>';
 }
 
 window.playVideo = playVideo;
